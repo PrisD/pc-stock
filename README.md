@@ -1,11 +1,11 @@
 # pc-stock
-
+### Grupo 2
 ### Modulos
-- Registro de entrada de mercancias ()
-- Actualización de niveles de stock () 
-- Audotoría de inventario ()
-- Generación de alertas de stock bajo ()
-- Reporte de inventario ()
+- Registro de entrada de mercancias (Lautaro Stuve)
+- Actualización de niveles de stock (Joaquin Terzano) 
+- Audotoría de inventario (Priscila Della Vecchia)
+- Generación de alertas de stock bajo (Matias Bonesi)
+- Reporte de inventario (Agustin Sanchez)
 
 ## Relevamiento del control de inventario
 Un almacén en el cual se reciben, almacenan y despachan productos de distintas características. 
