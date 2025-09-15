@@ -18,23 +18,23 @@ Los problemas que buscará resolver el sistema son:
  **Alcance**
 El sistema abarcará las siguientes funcionalidades principales:
 1. Registro de entrada de mercancías
-  - Alta de productos y lotes.
-  - Generación de movimientos de ingreso
+   - Alta de productos y lotes.
+   - Generación de movimientos de ingreso
 2. Actualización de niveles de stock
- - Recalcular stock en tiempo real en base a movimientos.
- - Mantener actualizado un inventario por producto y lote.
+   - Recalcular stock en tiempo real en base a movimientos.
+   - Mantener actualizado un inventario por producto y lote.
 3. Auditoría de inventario
- - Registro histórico de todos los movimientos.
- - Identificación de fechas y cantidades.
- - Posibilidad de generar reportes de auditoría por periodo.
+   - Registro histórico de todos los movimientos.
+   - Identificación de fechas y cantidades.
+   - Posibilidad de generar reportes de auditoría por periodo.
 4. Generación de alertas de stock bajo
- - Comparación automática con stock mínimo definido.
- - Emisión de alertas cuando un producto alcanza nivel crítico.
- - Gestión de alertas activas y resolución cuando el stock se normaliza.
+   - Comparación automática con stock mínimo definido.
+   - Emisión de alertas cuando un producto alcanza nivel crítico.
+   - Gestión de alertas activas y resolución cuando el stock se normaliza.
 5. Reportes de inventario
- - Reportes generales y filtrados (por producto, categoría o lote).
- - Visualización de stock actual, movimientos y alertas.
- - Exportación de informes para toma de decisiones.
+   - Reportes generales y filtrados (por producto, categoría o lote).
+   - Visualización de stock actual, movimientos y alertas.
+   - Exportación de informes para toma de decisiones.
 
 Lo que no se contempla:
 - Gestión de compras ni órdenes automáticas a proveedores.
@@ -43,25 +43,7 @@ Lo que no se contempla:
 - No realiza una gestión de usuarios que puedan ingresar al sistema.
 
 ## Diagrama Entidad Relación
-
-**Producto**
-- codigo de producto
-- descripcion
-- dimension
-- peso
-
-**Transacción**
-- codigo
-- codigo de producto
-- ingreso/egreso
-- cantidad
-- fecha
-- fecha vencimiento
-
-**Stock**
-- codigo
-- codigo de producto
-- cantidad
+<img width="992" height="491" alt="image" src="https://github.com/user-attachments/assets/36173e46-8682-4c52-81ee-602dd598469b" />
 
 ## Registro de entrada de mercancias
  - Una transacción es una entrada
