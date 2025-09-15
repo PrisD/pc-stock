@@ -43,7 +43,7 @@ Lo que no se contempla:
 - No realiza una gestión de usuarios que puedan ingresar al sistema.
 
 ## Diagrama Entidad Relación
-<img width="992" height="491" alt="image" src="https://github.com/user-attachments/assets/36173e46-8682-4c52-81ee-602dd598469b" />
+**<img width="1045" height="491" alt="image" src="https://github.com/user-attachments/assets/b936f6cf-107e-4fb9-8868-8057b3e34467" />**
 
 ## Registro de entrada de mercancias
  - Una transacción es una entrada
