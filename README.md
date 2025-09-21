@@ -75,6 +75,7 @@ El sistema abarcará las siguientes funcionalidades principales:
 
 ## Registro de entrada de mercancías
 - Una transacción es una entrada.
+
 **Objetivo del módulo**
 
 **Algoritmo**
@@ -100,9 +101,10 @@ El sistema abarcará las siguientes funcionalidades principales:
 ---
 
 ## Auditoría de inventario
-- a
 
 **Objetivo del módulo**
+
+Registrar todos los movimientos de entradas y salidas, control histórico y generación de stock actual.
 
 **Algoritmo**
 
@@ -113,28 +115,20 @@ El sistema abarcará las siguientes funcionalidades principales:
 ---
 
 ## Generación de alertas de stock bajo 
-- Cuando el stock de un producto sea menor a una cantidad establecida por el usuario, 
-el sistema deberá alertar al usuario que hay productos en poca cantidad.  
-Le deberá especificar qué producto está por debajo del límite y su cantidad actual.
 
 **Objetivo del módulo**
 
-**Algoritmo**
-
-**Niveles de refinamiento** 
-
-**Pseudocódigo**
-
-
+- Cuando el stock de un producto sea menor a una cantidad establecida por el usuario, el sistema deberá alertar al usuario que hay productos en poca cantidad.  
+Le deberá especificar qué producto está por debajo del límite y su cantidad actual.
 
 **Algoritmo**
-1. Chequear si se produjo un movimiento de egreso.  
+1. Chequear si se produjo un movimiento de egreso:  
    En caso afirmativo:  
-   1. Obtener la cantidad actual del producto egresado.  
-   2. Obtener el valor mínimo que debe haber del producto.  
-   3. Comparar si la cantidad actual es menor al valor mínimo.  
+   2. Obtener la cantidad actual del producto egresado.  
+   3. Obtener el valor mínimo que debe haber del producto.  
+   4. Comparar si la cantidad actual es menor al valor mínimo.  
       - En caso afirmativo:  
-        1. Lanzar alerta.  
+        5. Lanzar alerta.  
 
 **Niveles de refinamiento**
 
