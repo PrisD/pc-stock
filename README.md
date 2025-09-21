@@ -1,5 +1,7 @@
 # Sistema de control de Stock 
+
 Pensamiento Computacional
+
 **Grupo 2**
 
 
@@ -74,26 +76,38 @@ El sistema abarcará las siguientes funcionalidades principales:
 ## Registro de entrada de mercancías
 - Una transacción es una entrada.
 **Objetivo del módulo**
+
 **Algoritmo**
+
 **Niveles de refinamiento** 
+
 **Pseudocódigo**
 
 ---
 
 ## Actualización de niveles de stock
 - Hay un algoritmo que modifica la tabla stock a partir de una transacción.
+
 **Objetivo del módulo**
+
 **Algoritmo**
+
 **Niveles de refinamiento** 
+
 **Pseudocódigo**
+
 
 ---
 
 ## Auditoría de inventario
 - a
+
 **Objetivo del módulo**
+
 **Algoritmo**
+
 **Niveles de refinamiento** 
+
 **Pseudocódigo**
 
 ---
@@ -102,10 +116,15 @@ El sistema abarcará las siguientes funcionalidades principales:
 - Cuando el stock de un producto sea menor a una cantidad establecida por el usuario, 
 el sistema deberá alertar al usuario que hay productos en poca cantidad.  
 Le deberá especificar qué producto está por debajo del límite y su cantidad actual.
+
 **Objetivo del módulo**
+
 **Algoritmo**
+
 **Niveles de refinamiento** 
+
 **Pseudocódigo**
+
 
 
 **Algoritmo**
@@ -212,7 +231,11 @@ FIN PROCESO
 
 ## Reporte de inventario
 - a
-  **Objetivo del módulo**
+
+**Objetivo del módulo**
+
 **Algoritmo**
+
 **Niveles de refinamiento** 
+
 **Pseudocódigo**
