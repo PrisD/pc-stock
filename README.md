@@ -1,12 +1,10 @@
 # Sistema de control de Stock 
+Pensamiento Computacional
+**Grupo 2**
 
-## Pensamiento Computacional
-### Grupo 2
 
 ## Índice
 - [Sistema de control de Stock](#sistema-de-control-de-stock)
-  - [Pensamiento Computacional](#pensamiento-computacional)
-    - [Grupo 2](#grupo-2)
   - [Índice](#índice)
 - [Relevamiento del control de inventario](#relevamiento-del-control-de-inventario)
   - [Alcance](#alcance)
@@ -18,7 +16,6 @@
   - [Auditoría de inventario](#auditoría-de-inventario)
   - [Generación de alertas de stock bajo](#generación-de-alertas-de-stock-bajo)
   - [Reporte de inventario](#reporte-de-inventario)
-
 
 
 # Relevamiento del control de inventario
