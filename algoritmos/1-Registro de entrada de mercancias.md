@@ -6,17 +6,27 @@ Diseñar e implementar un módulo que permita registrar de manera precisa y auto
 El módulo no toca el stock directamente, solo se encarga de registrar el movimiento de entrada y de preparar la información necesaria (producto, lote, cantidad, vencimiento, etc.) para que después el módulo de Actualización de stock haga su parte.
 
 ## Algoritmo
-1- Repetir mientras el usuario quiera ingresar movimientos:
+1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
 
-    1.1- Solicitar y registrar datos del producto asociado.
+    1.1- Si desea crear un producto:
+
+        1.1- Solicitar y registrar datos del producto asociado.
+        
+        1.1.1- Si los datos son correctos:
+        
+            1.1.1.1- Guardar los datos registrados en la base de datos.
     
-    1.2- Solicitar y registrar datos del lote asociado.
-
-    1.3- Solicitar y registrar datos del movimiento.
-
-    1.5- Si los datos son correctos:
+    1.2- Si desea ingresar un movimiento:
     
-        1.5.1- Guardar los datos registrados en la base de datos.
+        1.2.1- Seleccionar producto existente en el sistema o crear uno nuevo.
+        
+        1.2.2- Seleccionar un lote existente en el sistema o solicitar los datos y crear uno nuevo.
+
+        1.2.3- Solicitar y registrar datos del movimiento.
+
+        1.2.4- Si los datos son correctos:
+            
+            1.2.4.1- Guardar los datos registrados en la base de datos.
 
 ## Niveles de refinamiento 
 
