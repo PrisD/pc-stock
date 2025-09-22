@@ -33,9 +33,10 @@ El sistema abarcará las siguientes funcionalidades principales:
    - Recalcular stock en tiempo real en base a movimientos.
    - Mantener actualizado un inventario por producto y lote.
 3. Auditoría de inventario
-   - Registro histórico de todos los movimientos.
-   - Identificación de fechas y cantidades.
-   - Posibilidad de generar reportes de auditoría por periodo.
+   - Conocer el acceso y la salida del usuario
+   - Monitorear que acciones realiza un usuario
+   - Ver acciones de un determinado usuario en un período
+   - Auditar los movimientos realizados por usuarios 
 4. Generación de alertas de stock bajo
    - Comparación automática con stock mínimo definido.
    - Emisión de alertas cuando un producto alcanza nivel crítico.
