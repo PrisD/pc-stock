@@ -7,7 +7,7 @@ El módulo no toca el stock directamente, solo se encarga de registrar el movimi
 
 ## Algoritmo
     1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
-
+    
         1.1 Si desea crear un producto:
     
             1.1- Solicitar y registrar datos del producto asociado.
@@ -23,6 +23,45 @@ El módulo no toca el stock directamente, solo se encarga de registrar el movimi
 ## Niveles de refinamiento 
 
 ### Nivel 1
+    1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
+    
+        1.1. Si el usuario desea crear un producto:
+            CrearProducto():
+                1.1.1. Ingresar nombre del producto.
+                1.1.2. Ingresar descripción del producto.
+                1.1.3. Ingresar cantidad de stock mínimo.
+                1.1.4. Verificar que los datos sean válidos y que no exista duplicado.
+                1.1.5. Guardar producto en la base de datos.
+    
+        1.2. Si el usuario desea registrar un movimiento de ingreso:
+    
+            CrearIngreso():
+            
+                1.2.1. Seleccionar producto:
+                    - Si ya existe: elegir de la base de datos.
+                    - Si es nuevo: llamar a CrearProducto().
+    
+                1.2.2. Seleccionar o crear lote:
+                    - Si el lote ya existe: seleccionarlo.
+                    - Si no existe: 
+                        CrearLote():
+                            1.2.2.1. Asociar ID del producto.
+                            1.2.2.2. Ingresar fecha de vencimiento.
+                            1.2.2.3. Ingresar cantidad inicial del lote.
+                            1.2.2.4. Validar datos.
+                            1.2.2.5. Guardar lote en la base de datos.
+    
+                1.2.3. Crear movimiento de ingreso:
+                    CrearMovimiento():
+                        1.2.3.1. Asociar ID del lote.
+                        1.2.3.2. Asociar tipo de movimiento = "ingreso".
+                        1.2.3.3. Ingresar fecha del movimiento.
+                        1.2.3.4. Ingresar cantidad del movimiento (no forzar a que sea igual a la del lote).
+                        1.2.3.5. Guardar movimiento en la base de datos.
+    
+        1.3. Si el usuario desea registrar un movimiento de egreso:
+            RegistrarSalidasDeMercancia()
+
 ### Nivel 2
 
 ## Pseudocódigo
