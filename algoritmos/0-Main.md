@@ -76,3 +76,50 @@ Menu principal
                     4.7.1 mostrar mensaje de error.
         
 ## Pseudocódigo
+        INICIO
+        
+            // Paso 1: Iniciar sesión
+            REPETIR
+                ESCRIBIR "Ingrese usuario:"
+                LEER usuario
+                ESCRIBIR "Ingrese contraseña:"
+                LEER contraseña
+        
+                credenciales_validas = ValidarCredenciales(usuario, contraseña)
+        
+                SI credenciales_validas = FALSO ENTONCES
+                    ESCRIBIR "Usuario o contraseña incorrectos."
+                
+            HASTA QUE credenciales_validas = VERDADERO
+        
+            // Paso 2: Menú principal
+            opcion = 0
+        
+            MIENTRAS opcion <> 6 HACER
+                ESCRIBIR "===== MENU PRINCIPAL ====="
+                ESCRIBIR "1. Registrar Movimientos"
+                ESCRIBIR "2. Consultar Stock Actual"
+                ESCRIBIR "3. Consultar Movimientos (Auditoría)"
+                ESCRIBIR "4. Consultar Alertas de Stock Bajo"
+                ESCRIBIR "5. Visualizar Reporte"
+                ESCRIBIR "6. Cerrar Sesión"
+                ESCRIBIR "Seleccione una opción:"
+                LEER opcion
+        
+                SEGÚN opcion HACER
+                    CASO 1:
+                        RegistrarMovimientos()
+                        ConsultarStockActual()
+                        ConsultarAlertasStockBajo()
+                    CASO 2:
+                        ConsultarStockActual()
+                    CASO 3:
+                        ConsultarMovimientosAuditoria()
+                    CASO 4:
+                        ConsultarAlertasStockBajo()
+                    CASO 5:
+                        VisualizarReporte()
+                    CASO 6:
+                        ESCRIBIR "Cerrando sesión..."
+                    DE OTRO MODO:
+                        ESCRIBIR "Opción inválida. Intente nuevamente."
