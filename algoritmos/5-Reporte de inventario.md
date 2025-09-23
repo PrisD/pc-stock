@@ -6,7 +6,7 @@ Generar reportes generales por periodo (dia, semana, mes, etc.) sobre el estado 
 
 ## Algoritmo
 1. Solicitar al usuario el periodo del que desea obtener el reporte. (dia, semana o mes)
-2. Consultar los datos de inventario y movimientos del periodo elegido.
+2. Consultar los datos requeridos de la base de datos
 3. Procesar la informacion para cada producto: stock actual, ingresos, egresos, vencimientos y comparaciones con ciclo anterior.
 4. Generar el reporte con todos los indicadores.
 5. Mostrar el reporte al usuario.
@@ -20,16 +20,11 @@ Generar reportes generales por periodo (dia, semana, mes, etc.) sobre el estado 
 2. Obtencion de informacion
     - Consultar productos
     - Consultar lotes
-    - Consultar movimientos periodo actual
-    - Consultar movimientos periodo anterior para comparacion
+    - Consultar movimientos
 3. Procesamiento de datos
     - Obtener stock actual
-    - Obtener ingresos y egresos del periodo actual
-    - Otener ingresos y egresos del periodo anterior
-    - Obtener cantidad de producto vencido del periodo actual
-    - Obtener cantidad de producto vencido del periodo anterior
+    - Procesar ingresos y egresos, actuales y del periodo anterior
     - Encontrar lote con vencimiento mas proximo
-    - Mostrar fecha de vencimiento mas proxima
 4. Generacion del reporte
     - Crear tabla de resultados con columnas | Producto | Inventario actual | Ingresos | Egresos | % Ingresos vs ciclo anterior | % Egresos vs ciclo anterior | Vencido | Lote más próximo a vencer | Fecha más próxima de vencimiento |
 5. Salida
@@ -57,7 +52,7 @@ Generar reportes generales por periodo (dia, semana, mes, etc.) sobre el estado 
     - Identificar productos vencidos en el periodo
     - Calcular relacion de vencimientos respecto al periodo anterior (%)
     - Calcular lote con vencimiento mas proximo
-    - Mostrar fecha de vencimiento mas proxima
+    - Obtener fecha de vencimiento mas proxima
 4. Generacion del reporte
     - Crear tabla de resultados con columnas | Producto | Inventario actual | Ingresos | Egresos | % Ingresos vs ciclo anterior | % Egresos vs ciclo anterior | Vencido | Lote más próximo a vencer | Fecha más próxima de vencimiento |
 5. Salida
@@ -65,3 +60,53 @@ Generar reportes generales por periodo (dia, semana, mes, etc.) sobre el estado 
     - Dar opcion a exportar el reporte a otro formato (.txt, excel, etc)
 
 ## Pseudocódigo
+INICIO
+
+    // 1. Entrada de datos
+    PEDIR tipo_ciclo (día, semana, mes)
+    PEDIR fecha_inicial
+    fecha_final ← CALCULAR_FECHA_FINAL(fecha_inicial, tipo_ciclo)
+    fecha_inicial_ca ← CALCULAR_CICLO_ANTERIOR(fecha_inicial, tipo_ciclo)   // ca = ciclo anterior
+    fecha_final_ca ← CALCULAR_CICLO_ANTERIOR(fecha_final, tipo_ciclo)       // ca = ciclo anterior
+
+    // 2. Obtención de información
+    productos ← CONSULTAR tabla_productos
+    stock_actual ← CONSULTAR tabla_stock(productos)
+    lotes ← CONSULTAR tabla_lotes(productos)
+    movimientos_actual ← CONSULTAR tabla_movimientos(productos, fecha_inicial, fecha_final)
+    movimientos_anterior ← CONSULTAR tabla_movimientos(productos, fecha_inicial_ca, fecha_final_ca)
+
+    // 3. Procesamiento de datos
+    PARA cada producto EN productos HACER
+        stock ← stock_actual[producto]
+
+        ingresos ← SUMAR movimientos_actual.ingresos(producto)
+        egresos ← SUMAR movimientos_actual.egresos(producto)
+
+        ingresos_anteriores ← SUMAR movimientos_anterior.ingresos(producto)
+        egresos_anteriores ← SUMAR movimientos_anterior.egresos(producto)
+
+        porcentaje_ingresos ← CALCULAR % (ingresos, ingresos_anteriores)
+        porcentaje_egresos ← CALCULAR % (egresos, egresos_anteriores)
+
+        vencidos ← IDENTIFICAR lotes vencidos(producto, fecha_inicial, fecha_final)
+        lote_proximo ← ENCONTRAR lote con vencimiento más cercano(producto)
+        fecha_proxima ← OBTENER fecha de vencimiento más próxima(producto)
+
+        AGREGAR fila a tabla_resultados con:
+            Producto, inventario, ingresos, egresos,
+            porcentaje_ingresos, porcentaje_egresos,
+            vencidos, lote_proximo, fecha_proxima
+    FIN PARA
+
+    // 4. Generación del reporte
+    CREAR tabla_resultados con las filas de cada producto
+
+    // 5. Salida
+    MOSTRAR tabla_resultados en pantalla
+    PREGUNTAR si se desea exportar
+    SI respuesta = si ENTONCES
+        PEDIR formato de exportación
+        EXPORTAR reporte en formato seleccionado (.txt, .xls, etc)
+
+FIN
