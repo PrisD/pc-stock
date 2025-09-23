@@ -2,8 +2,7 @@
 
 ## Objetivo del módulo
 
-- Cuando el stock de un producto sea menor a una cantidad establecida por el usuario, el sistema deberá alertar al usuario que hay productos en poca cantidad.  
-Le deberá especificar qué producto está por debajo del límite y su cantidad actual.
+- Cuando el stock de un producto sea menor a una cantidad establecida, el sistema deberá alertar al usuario que hay productos en poca cantidad.Le deberá especificar qué producto está por debajo del límite y su cantidad actual.
 
 ## Algoritmo
 ```pseudo
@@ -55,7 +54,7 @@ Para cada producto en la base de datos:
 ## Pseudocódigo
 
 ```pseudo
-MODULO verificar_stock_periodico()
+MODULO verificar_stock()
             PARA CADA producto EN productos HACER
                 cantidad_actual <--- buscar_lotes(producto.id)
                 stock_minimo <--- buscar_stock_minimo(producto.id)
