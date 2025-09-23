@@ -2,7 +2,7 @@
 
 ## Objetivo del módulo
 
-- Cuando el stock de un producto sea menor a una cantidad establecida, el sistema deberá alertar al usuario que hay productos en poca cantidad.Le deberá especificar qué producto está por debajo del límite y su cantidad actual.
+- Cuando el stock de un producto sea menor a una cantidad establecida, el sistema deberá alertar al usuario que hay productos en poca cantidad.Le deberá especificar qué producto está por debajo del límite y su cantidad actual. Además deberá registrar la alerta en la base de datos.
 
 ## Algoritmo
 ```pseudo
@@ -27,7 +27,8 @@ Para cada producto en la base de datos:
         i) Si cantidad_actual < stock_minimo entonces:
             4)
                 i) Generar un registro con los datos de la alerta.
-                ii) Mostrar la alerta. 
+                ii) Mostrar la alerta.
+               iii) Guardar alerta en la base de datos.
 ```
 ### Nivel 2
 ```pseudo
@@ -50,6 +51,7 @@ Para cada producto en la base de datos:
                     b) Cantidad actual.
                     c) Diferencia = {stock_minimo - cantidad_actual}.
                 ii) Mostrar la alerta.
+               iii) Guardar alerta en la base de datos.
 ```
 ## Pseudocódigo
 
@@ -62,6 +64,7 @@ MODULO verificar_stock()
                 SI cantidad_actual < stock_minimo ENTONCES
                     alerta <--- crear_alerta(producto.id, cantidad_actual, stock_minimo)
                     mostrar_alerta(alerta)
+                    guardar_alerta(alerta)
                 FIN SI
         FIN SI
     FIN MIENTRAS
@@ -86,6 +89,7 @@ FIN FUNCION
 
 FUNCION crear_alerta(id_producto, cantidad_actual, stock_minimo)
     alerta <--- nuevo_registro()
+    alerta.id_producto <--- id_producto
     alerta.nombre_producto <--- obtener_nombre_producto(id_producto)
     alerta.cantidad_actual <--- cantidad_actual
     alerta.diferencia <--- stock_minimo - cantidad_actual
@@ -99,6 +103,11 @@ PROCESO mostrar_alerta(alerta)
     IMPRIMIR "Producto: " + alerta.nombre_producto
     IMPRIMIR "Cantidad actual: " + alerta.cantidad_actual
     IMPRIMIR alerta.mensaje
+FIN PROCESO
+
+PROCESO guardar_alerta(alerta)
+    query <--- " INSERT INTO Alerta (id_producto, fecha, cantidad, descripcion) VALUES ( alerta.id_producto, alerta.fecha, alerta.cantidad_actual, alerta.mensaje)"
+    ejecutar_query(query)
 FIN PROCESO
 
 ```
