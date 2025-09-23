@@ -39,6 +39,7 @@ El sistema abarcará las siguientes funcionalidades principales:
 4. Generación de alertas de stock bajo
    - Comparación automática con stock mínimo definido.
    - Emisión de alertas cuando un producto se encuentra por debajo de su stock mínimo.
+   - Registro de las alertas en la base de datos.
 5. Reportes de inventario
    - Reportes generales y filtrados (por producto, categoría o lote).
    - Visualización de stock actual y movimientos.
@@ -53,7 +54,8 @@ El sistema abarcará las siguientes funcionalidades principales:
 ---
 
 # Diagrama Entidad Relación
-<img width="1045" height="491" alt="Diagrama ER" src="https://github.com/user-attachments/assets/b936f6cf-107e-4fb9-8868-8057b3e34467" />
+<img width="1086" height="694" alt="Captura de pantalla 2025-09-23 145429" src="https://github.com/user-attachments/assets/f1ac2ff1-d526-4c3c-8f3d-fe75c3851426" />
+
 
 ---
 
