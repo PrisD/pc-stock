@@ -42,19 +42,19 @@ Tener trazabilidad de cada acción realizada por los distintos usuarios dentro d
 ### Nivel 2
 
 1. Crear tabla `Auditoría` con campos:
-   1. 1. `id` (PK)
-   1. 2. `usuario` (FK a tabla usuarios)
-   1. 3. `acción` (string)
-   1. 4. `fecha_hora` (timestamp)
-   1. 5. `módulo` (string)
-   1. 6. `detalles` (text)
+   1.1. `id` (PK)
+   1.2. `usuario` (FK a tabla usuarios)
+   1.3. `acción` (string)
+   1.4. `fecha_hora` (timestamp)
+   1.5. `módulo` (string)
+   1.6. `detalles` (text)
 2. Función `registrar_accion(usuario, acción, módulo, detalles)`:
-   2. 1. Obtener fecha y hora actual.
-   2. 2. Insertar registro en tabla `auditoría`.
+   2.1. Obtener fecha y hora actual.
+   2.2. Insertar registro en tabla `auditoría`.
 3. Función `consultar_auditoría(filtros)`:
-   1. 1. Construir consulta SQL con filtros.
-   1. 2. Ejecutar consulta y obtener resultados.
-   1. 3. Formatear resultados para presentación.
+   3.1. Construir consulta SQL con filtros.
+   3.2. Ejecutar consulta y obtener resultados.
+   3.3. Formatear resultados para presentación.
 
 
 ## Pseudocódigo
