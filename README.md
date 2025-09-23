@@ -22,35 +22,33 @@ Los problemas que buscará resolver el sistema son:
 - Dificultad para llevar un control exacto de las entradas y salidas de mercancías.
 - Riesgo de faltantes de stock al no detectar a tiempo cuando un producto baja de su nivel mínimo.
 - Imposibilidad de obtener reportes en tiempo real que reflejen la situación del inventario.
-- Alta probabilidad de errores humanos, duplicación de registros o pérdida de información.
+- Realizar anotaciones o controles del inventario en papel.
 
 ## Alcance
 El sistema abarcará las siguientes funcionalidades principales:
 1. Registro de entrada de mercancías
-   - Alta de productos y lotes.
    - Generación de movimientos de ingreso.
 2. Actualización de niveles de stock
    - Recalcular stock en tiempo real en base a movimientos.
-   - Mantener actualizado un inventario por producto y lote.
+   - Mantener actualizado un inventario detectando si un lote se encuentra vencido.
 3. Auditoría de inventario
-   - Conocer el acceso y la salida del usuario
-   - Monitorear que acciones realiza un usuario
-   - Ver acciones de un determinado usuario en un período
-   - Auditar los movimientos realizados por usuarios 
+   - Conocer el acceso y la salida del usuario.
+   - Monitorear que acciones realiza un usuario.
+   - Ver acciones de un determinado usuario en un período.
+   - Auditar los movimientos realizados por usuarios.
 4. Generación de alertas de stock bajo
    - Comparación automática con stock mínimo definido.
-   - Emisión de alertas cuando un producto alcanza nivel crítico.
-   - Gestión de alertas activas y resolución cuando el stock se normaliza.
+   - Emisión de alertas cuando un producto se encuentra por debajo de su stock mínimo.
 5. Reportes de inventario
    - Reportes generales y filtrados (por producto, categoría o lote).
-   - Visualización de stock actual, movimientos y alertas.
+   - Visualización de stock actual y movimientos.
    - Exportación de informes para toma de decisiones.
 
 ## Lo que no se contempla
 - Gestión de compras ni órdenes automáticas a proveedores.
 - No gestiona precios, facturación ni ventas, solo control físico de inventario.
 - No cubre logística de transporte ni distribución fuera del almacén.
-- No realiza una gestión de usuarios que puedan ingresar al sistema.
+- No realiza una gestión o validación de usuarios por contraseña.
 
 ---
 
