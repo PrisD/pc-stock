@@ -47,9 +47,9 @@ El sistema abarcará las siguientes funcionalidades principales:
 
 ## Lo que no se contempla
 - Gestión de compras ni órdenes automáticas a proveedores.
-- No gestiona precios, facturación ni ventas, solo control físico de inventario.
-- No cubre logística de transporte ni distribución fuera del almacén.
-- No realiza una gestión o validación de usuarios por contraseña.
+- Gestionar precios, facturación ni ventas, solo control físico de inventario.
+- Logística de transporte ni distribución fuera del almacén.
+- Realizar una gestión o validación de usuarios por contraseña.
 
 ---
 
