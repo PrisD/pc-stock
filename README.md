@@ -62,6 +62,7 @@ El sistema abarcará las siguientes funcionalidades principales:
 
 
 # Módulos
+- [Main](algoritmos/0-main.md)
 - [Registro de entrada de mercancías (Lautaro Stuve)](algoritmos/1-Registro%20de%20entrada%20de%20mercancias.md)
 - [Actualización de niveles de stock (Joaquín Terzano)](algoritmos/2-Actualización%20de%20niveles%20de%20Stock.md) 
 - [Auditoría de inventario (Priscila Della Vecchia)](algoritmos/3-Auditoria%20de%20inventario.md)
