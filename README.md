@@ -15,6 +15,9 @@ Pensamiento Computacional
 - [Módulos](#módulos)
 
 
+# Objetivo General
+Controlar el inventario de un almacen
+
 # Relevamiento del control de inventario
 Un almacén en el cual se reciben, almacenan y despachan productos de distintas características.  
 Los problemas que buscará resolver el sistema son:
