@@ -57,7 +57,8 @@ El sistema abarcará las siguientes funcionalidades principales:
 ---
 
 # Diagrama Entidad Relación
-<img width="1009" height="708" alt="image" src="https://github.com/user-attachments/assets/20fb9756-3da8-424e-80e4-ff6f7099eeb4" />
+<img width="1077" height="695" alt="image" src="https://github.com/user-attachments/assets/1473b125-a12b-4cc3-beea-0c320e2df867" />
+
 
 
 
