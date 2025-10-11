@@ -16,7 +16,7 @@ Pensamiento Computacional
 
 
 # Objetivo General
-Controlar el inventario de un almacen
+Gestionar las cantidades de mercadería en un inventario de un almacen.
 
 # Relevamiento del control de inventario
 Un almacén en el cual se reciben, almacenan y despachan productos de distintas características.  
@@ -59,6 +59,9 @@ El sistema abarcará las siguientes funcionalidades principales:
 # Diagrama Entidad Relación
 <img width="1077" height="695" alt="image" src="https://github.com/user-attachments/assets/1473b125-a12b-4cc3-beea-0c320e2df867" />
 
+# Diagrama de Flujo
+
+<img width="1390" height="645" alt="image" src="https://github.com/user-attachments/assets/9703e3c1-ccb4-404e-b997-b4c15766555e" />
 
 
 
@@ -66,7 +69,7 @@ El sistema abarcará las siguientes funcionalidades principales:
 
 
 # Módulos
-- [Main](algoritmos/0-main.md)
+- [Main](algoritmos/0-Main.md)
 - [Registro de entrada de mercancías (Lautaro Stuve)](algoritmos/1-Registro%20de%20entrada%20de%20mercancias.md)
 - [Actualización de niveles de stock (Joaquín Terzano)](algoritmos/2-Actualización%20de%20niveles%20de%20Stock.md) 
 - [Auditoría de inventario (Priscila Della Vecchia)](algoritmos/3-Auditoria%20de%20inventario.md)
