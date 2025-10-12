@@ -39,3 +39,56 @@ El algoritmo encuentra todos los lotes no marcados que, en la fecha de su ejecuc
 ```
 
 ## Pseudocódigo
+PROCEDIMIENTO ActualizarNivelesDeStock()
+
+    // Marcar lotes vencidos
+    listaLotes ← SeleccionarTodos("Lote", ordenPor = "fecha_vencimiento ASC")
+
+    PARA CADA producto EN Tabla("Producto") HACER
+        lotesProducto ← Filtrar(listaLotes, 
+                                condicion = (lote.idProducto = producto.id) 
+                                            Y (lote.vencido = FALSO))
+
+        PARA CADA lote EN lotesProducto HACER
+            SI FechaActual() >= lote.fecha_vencimiento ENTONCES
+                lote.vencido ← VERDADERO
+                Actualizar("Lote", lote)
+                RegistrarAuditoria("Lote vencido", producto.id, lote.id)
+            FIN SI
+        FIN PARA
+    FIN PARA
+
+
+    //  Calcular stock actual de cada producto 
+    SI CalcularStock = VERDADERO ENTONCES
+        movimientos ← SeleccionarTodos("Movimiento", 
+                                       condicion = (lote.vencido = FALSO))
+
+        PARA CADA producto EN Tabla("Producto") HACER
+            movimientosProducto ← Filtrar(movimientos, 
+                                           condicion = (movimiento.idProducto = producto.id))
+
+            cantidadTotal ← 0
+
+            PARA CADA mov EN movimientosProducto HACER
+                cantidadTotal ← cantidadTotal + mov.cantidad
+            FIN PARA
+
+            registroStock ← Buscar("Stock", condicion = (stock.idProducto = producto.id))
+
+            SI registroStock EXISTE ENTONCES
+                registroStock.cantidad_actual ← cantidadTotal
+                Actualizar("Stock", registroStock)
+            SINO
+                nuevoStock ← CrearRegistro("Stock", {
+                    idProducto: producto.id,
+                    cantidad_actual: cantidadTotal
+                })
+                Insertar("Stock", nuevoStock)
+            FIN SI
+
+            RegistrarAuditoria("Stock actualizado", producto.id, NULL)
+        FIN PARA
+    FIN SI
+
+FIN PROCEDIMIENTO
