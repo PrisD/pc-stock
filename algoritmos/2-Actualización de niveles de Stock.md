@@ -39,6 +39,7 @@ El algoritmo encuentra todos los lotes no marcados que, en la fecha de su ejecuc
 ```
 
 ## Pseudocódigo
+```
 PROCEDIMIENTO ActualizarNivelesDeStock()
 
     // Marcar lotes vencidos
@@ -92,3 +93,4 @@ PROCEDIMIENTO ActualizarNivelesDeStock()
     FIN SI
 
 FIN PROCEDIMIENTO
+```
