@@ -6,8 +6,8 @@ El módulo deberá:
     Asegurar la correcta captura de la información del producto (nombre, descripción y stock mínimo).
     Registrar los datos del lote asociado (producto, fecha de vencimiento, cantidad).
     Generar un movimiento inmutable para cada operación, que quedará como respaldo para auditorías.
-    Preparar y enviar la información registrada al módulo de actualización de stock, encargado de validar y reflejar los cambios en el inventario.
-Este módulo no modifica directamente el stock, sino que se centra en garantizar la integridad de la información registrada, la inmutabilidad de los movimientos y la disponibilidad de datos consistentes para la gestión posterior del inventario.
+    Validar los datos y guardarlos en la base de datos.
+Este módulo no modifica directamente la tabla stock.
 
 
 ## Algoritmo
