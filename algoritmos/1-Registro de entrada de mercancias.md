@@ -3,10 +3,10 @@
 ## Objetivo del módulo
 Diseñar e implementar un módulo que permita registrar de manera precisa y automatizada los movimientos de ingresos de mercancías en el almacén, garantizando su trazabilidad mediante el registro del usuario, fecha, lote, tipo de movimiento y cantidad.
 El módulo deberá:
-    Asegurar la correcta captura de la información del producto (nombre, descripción y stock mínimo).
-    Registrar los datos del lote asociado (producto, fecha de vencimiento, cantidad).
-    Generar un movimiento inmutable para cada operación, que quedará como respaldo para auditorías.
-    Validar los datos y guardarlos en la base de datos.
+ * Asegurar la correcta captura de la información del producto (nombre, descripción y stock mínimo).
+ * Registrar los datos del lote asociado (producto, fecha de vencimiento, cantidad).
+ * Generar un movimiento inmutable para cada operación, que quedará como respaldo para auditorías.
+ * Validar los datos y guardarlos en la base de datos.
 Este módulo no modifica directamente la tabla stock.
 
 
