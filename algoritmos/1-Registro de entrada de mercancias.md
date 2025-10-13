@@ -51,9 +51,17 @@ Este módulo no modifica directamente la tabla stock.
     
         1.1. Si el usuario desea crear un producto:
             CrearProducto():
-                1.1.1. Ingresar datos del producto
-                1.1.4. Verificar que los datos sean válidos y que no exista duplicado.
-                1.1.5. Guardar producto en la base de datos.
+                1.1.1. Ingresar nombre del producto.
+                    1.1.1.1 . Validar que no esté vacío, que no exceda 50 caracteres y que no exista ya en la base de datos.
+                    
+                1.1.2. Ingresar descripción del producto (texto opcional, máx. 100 caracteres).
+                    1.1.2.1 . Validar que no exceda 100 caracteres.
+                    
+                1.1.3. Ingresar stock mínimo (entero mayor o igual a 0).
+                    1.1.3.1 . Validar que sea un número entero >= 0.
+                    
+                1.1.5. Si todo es válido:
+                    Guardar producto en la base de datos.
     
         1.2. Si el usuario desea registrar un movimiento:
     
