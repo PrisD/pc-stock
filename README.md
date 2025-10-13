@@ -29,8 +29,8 @@ Los problemas que buscará resolver el sistema son:
 
 ## Alcance
 El sistema abarcará las siguientes funcionalidades principales:
-1. Registro de entrada de mercancías
-   - Generación de movimientos de ingreso.
+1. Registro de entrada y salidas de mercancías
+   - Generación de movimientos de ingreso y egreso.
 2. Actualización de niveles de stock
    - Recalcular stock en tiempo real en base a movimientos.
    - Mantener actualizado un inventario detectando si un lote se encuentra vencido.
