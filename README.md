@@ -1,5 +1,3 @@
-<img width="1571" height="727" alt="image" src="https://github.com/user-attachments/assets/7c87bff0-9a08-49d9-b7e8-23fbb4ff7edf" /># Sistema de control de Stock 
-
 Pensamiento Computacional
 
 **Grupo 2**
