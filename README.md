@@ -61,7 +61,8 @@ El sistema abarcará las siguientes funcionalidades principales:
 
 # Diagrama de Flujo
 
-<img width="1390" height="645" alt="image" src="https://github.com/user-attachments/assets/9703e3c1-ccb4-404e-b997-b4c15766555e" />
+<img width="1456" height="688" alt="image" src="https://github.com/user-attachments/assets/f1ad538c-23a2-4b5f-9d17-8dec67b1a66a" />
+
 
 
 
