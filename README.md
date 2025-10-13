@@ -1,4 +1,4 @@
-Pensamiento Computacional
+# Pensamiento Computacional
 
 **Grupo 2**
 
