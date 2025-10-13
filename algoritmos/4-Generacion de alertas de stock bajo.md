@@ -81,6 +81,7 @@ FIN FUNCION
 
 
 FUNCION buscar_stock_minimo(id_producto)
+    establecer_conexion_BD()
     query <--- "SELECT stock_minimo FROM Producto WHERE id_producto = id_producto"
     stock_minimo <--- ejecutar_query(query)
     RETORNAR stock_minimo
@@ -106,6 +107,7 @@ PROCESO mostrar_alerta(alerta)
 FIN PROCESO
 
 PROCESO guardar_alerta(alerta)
+    establecer_conexion_BD()
     query <--- " INSERT INTO Alerta (id_producto, fecha, cantidad, descripcion) VALUES ( alerta.id_producto, alerta.fecha, alerta.cantidad_actual, alerta.mensaje)"
     ejecutar_query(query)
 FIN PROCESO
