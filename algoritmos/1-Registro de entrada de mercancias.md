@@ -26,16 +26,16 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
         1.1. Si el usuario desea crear un producto:
             CrearProducto():
                 1.1.1. Ingresar datos del producto
-                1.1.4. Verificar que los datos sean válidos y que no exista duplicado.
-                1.1.5. Guardar producto en la base de datos.
+                1.1.2. Verificar que los datos sean válidos y que no exista duplicado.
+                1.1.3. Guardar producto en la base de datos.
     
         1.2. Si el usuario desea registrar un movimiento:
     
             Si es un ingreso:
-                CrearMovimiento(tipo = ingreso):
+                RegistrarMovimiento(tipo = ingreso):
             
             Si es un egreso:
-                CrearMovimiento(tipo = egreso):
+                RegistrarMovimiento(tipo = egreso):
     
         1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
 
