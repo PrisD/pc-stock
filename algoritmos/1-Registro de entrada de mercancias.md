@@ -32,118 +32,92 @@ Este módulo no modifica directamente la tabla stock.
     
         1.1. Si el usuario desea crear un producto:
             CrearProducto():
-                1.1.1. Ingresar datos del producto.
-                1.1.2. Verificar que los datos sean válidos y que no exista duplicado.
-                1.1.3. Guardar producto en la base de datos.
+                1.1.1. Ingresar datos del producto
+                1.1.4. Verificar que los datos sean válidos y que no exista duplicado.
+                1.1.5. Guardar producto en la base de datos.
     
-        1.2. Si el usuario desea registrar un movimiento de ingreso:
+        1.2. Si el usuario desea registrar un movimiento:
     
-            CrearIngreso():
+            Si es un ingreso:
+                CrearMovimiento(tipo = ingreso):
             
-                1.2.1. Seleccionar producto:
-                    - Si ya existe: elegir de la base de datos.
-                    - Si es nuevo: llamar a CrearProducto().
+            Si es un egreso:
+                CrearMovimiento(tipo = egreso):
     
-                1.2.2. Seleccionar o crear lote:
-                    - Si el lote ya existe: seleccionarlo.
-                    - Si no existe: 
-                        CrearLote():
-                            1.2.2.1. Ingresar datos del lote
-                            1.2.2.4. Validar datos.
-                            1.2.2.5. Guardar lote en la base de datos.
-    
-                1.2.3. Crear movimiento de ingreso:
-                    CrearMovimiento(ingreso):
-                        1.2.3.1. Asociar ID del lote.
-                        1.2.3.2. Asociar tipo de movimiento = ingreso.
-                        1.2.3.3. Ingresar fecha del movimiento.
-                        1.2.3.4. Ingresar cantidad del movimiento.
-                        1.2.3.5. Guardar movimiento en la base de datos.
-    
-        1.3. Si el usuario desea registrar un movimiento de egreso:
-            RegistrarSalidasDeMercancia()
-
         1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
 
 ### Nivel 2
-Nivel  2 refinamiento
-
-    Repetir mientras el usuario desee crear productos o registrar movimientos:
-
-    Si desea crear un producto:
-    1.1. CrearProducto():
+    1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
     
-        1.1.1. Ingresar nombre del producto.
-            1.1.1.1 . Validar que no esté vacío, que no exceda 30 caracteres y que no exista ya en la base de datos.
-            
-        1.1.2. Ingresar descripción del producto (texto opcional, máx. 100 caracteres).
-            1.1.2.1 . Validar que no exceda 100 caracteres.
-            
-        1.1.3. Ingresar stock mínimo (entero mayor o igual a 0).
-            1.1.3.1 . Validar que sea un número entero >= 0.
-            
-        1.1.5. Si todo es válido:
-            Guardar producto en la base de datos.
-
-    Si desea registrar un movimiento:
-    1.2. CrearIngreso():
+        1.1. Si el usuario desea crear un producto:
+            CrearProducto():
+                1.1.1. Ingresar datos del producto
+                1.1.4. Verificar que los datos sean válidos y que no exista duplicado.
+                1.1.5. Guardar producto en la base de datos.
     
-        1.2.1. Seleccionar producto:
-
-            Si existe: elegirlo de la base de datos.
-            Si no existe: ejecutar CrearProducto (1.1).
-        
-        1.2.2. Seleccionar o crear lote:
-
-            Si existe: elegirlo de la base de datos.
-                1.2.5. Ingresar cantidad a agregar al lote.
-                1.2.4. Actualizar cantidad del lote sumando la cantidad ingresada.
-                
-            Si no existe: CrearLote(id del producto):
-
-                1.2.2.1. Asociar ID del producto.
-
-                1.2.2.2. Ingresar fecha de vencimiento:
-                    1.2.2.2.1 . Validar formato dd/mm/aaaa y que sea futura.
-
-                1.2.2.3. Ingresar cantidad inicial del lote:
-                    1.2.2.2.3.1 . Validar que sea un número entero > 0.
-
-                1.2.2.5. Guardar lote en la base de datos.
-                
-        1.2.3. CrearMovimiento(id del lote, ingreso):
-
-            1.2.3.1. Asociar ID del lote.
-
-            1.2.3.2. Tipo = ingreso.
-
-            1.2.3.3. Ingresar fecha del movimiento:
-                1.2.3.3.1 . Validar formato dd/mm/aaaa y que no sea futura.
-
-            1.2.3.4. Ingresar cantidad del movimiento:
-                1.2.3.4.1 . Validar que sea un número entero > 0.
-
-            1.2.3.5. Guardar movimiento en la base de datos.
+        1.2. Si el usuario desea registrar un movimiento:
+    
+            Si es un ingreso:
+                RegistrarMovimiento(tipo = ingreso):
             
-
-    1.3. Registrar Movimiento de Egreso:
-        1.3.1. Seleccionar producto desde la base de datos.
-        1.3.2. Seleccionar lote disponible (con stock suficiente).
-        1.3.3. Crear movimiento de egreso:
-
-            1.3.3.1. Asociar ID del lote.
-
-            1.3.3.2. Tipo = "egreso".
-
-            1.3.3.3. Ingresar fecha del movimiento (formato dd/mm/aaaa, no futura).
-
-            1.3.3.4. Ingresar cantidad del movimiento (entero > 0, no mayor al stock del lote).
-
-            1.3.3.5. Guardar movimiento en la base de datos.
-            
-        1.3.4. Actualizar cantidad del lote restando la cantidad egresada.
-        
-    1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
+            Si es un egreso:
+                RegistrarMovimiento(tipo = egreso):
+    
+        1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
+    
+    
+    
+    Funcion RegistrarMovimiento(tipo):
+        Si el tipo es ingreso:
+            1.2.1. Seleccionar producto:
+                - Si ya existe: elegir de la base de datos.
+                - Si es nuevo: llamar a CrearProducto().
+    
+            1.2.2. Seleccionar o crear lote:
+                - Si el lote ya existe: seleccionarlo.
+                    - Ingresar cantidad a agregar al lote.
+                    - Actualizar cantidad del lote sumando la cantidad ingresada.
+                - Si no existe: 
+                    CrearLote(id del producto):
+                        1.2.2.1. Asociar ID del producto.
+                        1.2.2.2. Ingresar fecha de ingreso:
+                            1.2.2.2.1 . Validar formato dd/mm/aaaa y que no sea futura.
+                        1.2.2.2. Ingresar fecha de vencimiento:
+                            1.2.2.2.1 . Validar formato dd/mm/aaaa y que sea futura.
+                        1.2.2.3. Ingresar cantidad inicial del lote:
+                            1.2.2.2.3.1 . Validar que sea un número entero > 0.
+                        1.2.2.4. Ingresar estado del lote = activo.
+                        1.2.2.5. Guardar lote en la base de datos.
+    
+            1.2.3. Crear movimiento de ingreso:
+                CrearMovimiento(id del lote, tipo, cantidad del lote, id_usuario):
+                    1.2.3.1 Ingresar datos del movimiento.
+                    1.2.3.2. Guardar movimiento en la base de datos.
+                    
+                    
+        Si el tipo es egreso:
+            1.2.1. Seleccionar producto:
+                - Elegir prodcuto de la base de datos.
+    
+            1.2.2. Seleccionar lote:
+                - Elegir lote de la base de datos con stock suficiente.
+                - ingresar cantidad a retirar del lote.
+                - validar que la cantidad a retirar no supere el stock del lote.
+                - Actualizar cantidad del lote restando la cantidad retirada.
+    
+            1.2.3. Crear movimiento de ingreso:
+                CrearMovimiento(id del lote, tipo, cantidad del ingreso o egreso del lote, id del usuario)
+         
+     
+    Funcion CrearMovimiento(id del lote, tipo, cantidad del lote, id_usuario):
+        1.2.3.1 Asociar ID del usuario
+        1.2.3.1. Asociar ID del lote.
+        1.2.3.2. Asociar tipo de movimiento (egreso o ingreso).
+        1.2.3.3. Ingresar fecha del movimiento:
+            1.2.3.3.1 . Validar formato dd/mm/aaaa y que no sea futura.
+        1.2.3.4. Asociar cantidad del ingreso o egreso del lote
+    
+        1.2.3.5. Guardar movimiento en la base de datos.
         
 ## Pseudocódigo
 
