@@ -1,4 +1,4 @@
-# Sistema de control de Stock 
+<img width="1571" height="727" alt="image" src="https://github.com/user-attachments/assets/7c87bff0-9a08-49d9-b7e8-23fbb4ff7edf" /># Sistema de control de Stock 
 
 Pensamiento Computacional
 
@@ -61,7 +61,8 @@ El sistema abarcará las siguientes funcionalidades principales:
 
 # Diagrama de Flujo
 
-<img width="1456" height="688" alt="image" src="https://github.com/user-attachments/assets/f1ad538c-23a2-4b5f-9d17-8dec67b1a66a" />
+<img width="1571" height="727" alt="image" src="https://github.com/user-attachments/assets/0cb31fcd-9dfe-4e62-8bb9-bb3610ec9ab1" />
+
 
 
 
