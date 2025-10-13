@@ -128,124 +128,149 @@ Este módulo no modifica directamente la tabla stock.
         
 ## Pseudocódigo
 
-    INICIO MóduloRegistro
+    INICIO RegistroEntradasySalidas
+        
+        MIENTRAS VERDADERO HACER
+            ESCRIBIR "--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---"
+            ESCRIBIR "1. Crear Nuevo Producto"
+            ESCRIBIR "2. Registrar Ingreso de Mercancia"
+            ESCRIBIR "3. Registrar Egreso de Mercancia"
+            ESCRIBIR "4. Salir"
+            LEER opcion
     
-        seguir = VERDADERO
-    
-        MIENTRAS seguir == VERDADERO:
-    
-            MOSTRAR "Selecciona una opcion:"
-            MOSTRAR "1 - Crear Producto"
-            MOSTRAR "2 - Registrar Movimiento de Ingreso"
-            MOSTRAR "3 - Registrar Movimiento de Egreso"
-            MOSTRAR "4 - Salir"
-            opcion = INGRESAR()
-    
-            CASE:
-    
+            SEGUN opcion HACER
                 CASO 1:
-                    CrearProducto()
-    
+                    LLAMAR CrearProducto()
                 CASO 2:
-                    CrearIngreso()
-    
+                    LLAMAR RegistrarMovimiento("INGRESO")
                 CASO 3:
-                    CrearEgreso()
-    
+                    LLAMAR RegistrarMovimiento("EGRESO")
                 CASO 4:
-                    seguir = FALSO
-    
-                OTRO:
-                    MOSTRAR "Opcion invalida."
+                    ESCRIBIR "Saliendo del programa."
+                    SALIR_DEL_BUCLE
+                DE OTRO MODO:
+                    ESCRIBIR "Opcion no valida. Intente de nuevo."
+            
     
             
     
-    FUNCION CrearProducto()
-        INGRESAR nombre_producto
-        MIENTRAS nombre_producto = "" O LONG(nombre_producto) > 30 O existeProducto(nombre_producto)
-            MOSTRAR "Nombre invalido o ya existente."
-            INGRESAR nombre_producto
+    INICIO FUNCION CrearProducto()
+        // 1.1.1. Ingresar datos del producto
+        ESCRIBIR "Ingrese nombre del nuevo producto:"
+        LEER nombre
+        ESCRIBIR "Ingrese descripcion:"
+        LEER descripcion
+        ESCRIBIR "Ingrese stock mínimo:"
+        LEER stock_minimo
     
-        INGRESAR descripcion_producto
-        MIENTRAS LONG(descripcion_producto) > 100
-            MOSTRAR "Descripcion demasiado larga."
-            INGRESAR descripcion_producto
+        // 1.1.4. Verificar que los datos sean validos y que no exista duplicado
+        SI nombre == "" O stock_minimo < 0 ENTONCES
+            ESCRIBIR "Error: El nombre no puede estar vacío y el stock minimo debe ser positivo."
+            RETORNAR NULO
     
-        INGRESAR stock_minimo
-        MIENTRAS stock_minimo < 0
-            MOSTRAR "El stock minimo debe ser ≥ 0."
-            INGRESAR stock_minimo
     
-        GuardarProducto(nombre_producto, descripcion_producto, stock_minimo)
+        SI BUSCAR_PRODUCTO_POR_NOMBRE(nombre) != NULO ENTONCES
+            ESCRIBIR "Error: Ya existe un producto con ese nombre."
+            RETORNAR NULO
         
-        MOSTRAR "Producto guardado correctamente."
+    
+        // 1.1.5. Guardar producto en la base de datos
+        nuevo_producto = GUARDAR_PRODUCTO_EN_BD(nombre, descripcion, stock_minimo)
+        ESCRIBIR "Producto creado con exito."
+        RETORNAR nuevo_producto
+    
+    
+    
+    INICIO FUNCION RegistrarMovimiento(tipo)
+        // 1.2.1. Seleccionar producto
+        ESCRIBIR "Ingrese el nombre del producto para el movimiento:"
+        LEER nombre_producto
+        producto = BUSCAR_PRODUCTO_POR_NOMBRE(nombre_producto)
+    
+        SI producto == NULO ENTONCES
+            SI tipo == "INGRESO" ENTONCES
+                ESCRIBIR "Producto no encontrado. Desea crearlo ahora? (S/N)"
+                LEER respuesta
+                SI respuesta == "S" ENTONCES
+                    producto = LLAMAR CrearProducto()
+                    SI producto == NULO ENTONCES
+                        ESCRIBIR "Error al crear producto. Operacion cancelada."
+                        RETORNAR
+                    
+                SINO
+                    ESCRIBIR "Operación cancelada."
+                    RETORNAR
+                
+            SINO // Es un EGRESO
+                ESCRIBIR "Error: No se puede dar salida a un producto que no existe."
+                RETORNAR
+            
+    
+        // 1.2.2. Seleccionar lote
+        ESCRIBIR "Ingrese el código del lote:"
+        LEER codigo_lote
+        lote = BUSCAR_LOTE_POR_CODIGO(producto.id, codigo_lote)
+    
+        ESCRIBIR "Ingrese la cantidad (unidades):"
+        LEER cantidad_movimiento
+    
+        SI tipo == "INGRESO" ENTONCES
+            SI lote != NULO ENTONCES // El lote ya existe
+                nueva_cantidad = lote.cantidad + cantidad_movimiento
+                ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
+                ESCRIBIR "Stock del lote existente actualizado."
+                
+            SINO // El lote es nuevo
+                lote = LLAMAR CrearLote(producto.id, codigo_lote, cantidad_movimiento)
+                SI lote == NULO ENTONCES
+                    ESCRIBIR "Error creando el lote. Operacion cancelada."
+                    RETORNAR
+                
+        SINO // tipo es EGRESO
+            SI lote == NULO ENTONCES
+                ESCRIBIR "Error: El lote no existe. No se puede registrar el egreso."
+                RETORNAR
+            
+            SI cantidad_movimiento > lote.cantidad ENTONCES
+                ESCRIBIR "Error: Stock insuficiente en el lote. Disponible: ", lote.cantidad
+                RETORNAR
+            
+            nueva_cantidad = lote.cantidad - cantidad_movimiento
+            ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
+            ESCRIBIR "Stock del lote actualizado."
         
-        RETORNAR id_producto
+    
+        // 1.2.3. Crear el registro del movimiento
+        LLAMAR CrearMovimiento(lote.id, tipo, cantidad_movimiento, ID_USUARIO_LOGUEADO)
+        
+    
+    
+    INICIO FUNCION CrearLote(id_producto, codigo_lote, cantidad_inicial)
+        // 1.2.2.2. Ingresar fechas
+        ESCRIBIR "Ingrese fecha de ingreso (dd/mm/aaaa):"
+        LEER fecha_ingreso // Validar formato y que no sea futura
+        ESCRIBIR "Ingrese fecha de vencimiento (dd/mm/aaaa):"
+        LEER fecha_vencimiento // Validar formato y que sea futura
+        
+        // 1.2.2.3. Validar cantidad
+        SI cantidad_inicial <= 0 ENTONCES
+            ESCRIBIR "Error: la cantidad inicial debe ser mayor a 0."
+            RETORNAR NULO  
+    
+        // 1.2.2.5. Guardar lote en la base de datos
+        nuevo_lote = GUARDAR_LOTE_EN_BD(id_producto, codigo_lote, fecha_ingreso, fecha_vencimiento, cantidad_inicial, "activo")
+        ESCRIBIR "Lote nuevo creado."
+        RETORNAR nuevo_lote
     
     
     
-    FUNCION CrearIngreso()
-        id_producto = SeleccionarProducto()
-        SI id_producto == NULO ENTONCES
-            id_producto = CrearProducto()
-    
-        id_lote = SeleccionarLote(id_producto)
-        SI id_lote == NULO ENTONCES
-            id_lote = CrearLote(id_producto)
-        SINO
-            INGRESAR cantidad_a_agregar
-            MIENTRAS cantidad_a_agregar ≤ 0
-                MOSTRAR "Debe ingresar una cantidad valida."
-                INGRESAR cantidad_a_agregar
-            ActualizarCantidadLote(id_lote, cantidad_a_agregar)
-    
-        CrearMovimiento(id_lote, 1)  # 1 para ingreso
-    
-    
-    FUNCION CrearLote(id_producto)
-        INGRESAR fecha_vencimiento
-        MIENTRAS no FormatoValido(fecha_vencimiento) O fecha_vencimiento ≤ FechaActual()
-            MOSTRAR "Fecha invalida. Debe ser futura."
-            INGRESAR fecha_vencimiento
-    
-        INGRESAR cantidad_inicial
-        MIENTRAS cantidad_inicial ≤ 0
-            MOSTRAR "Cantidad invalida."
-            INGRESAR cantidad_inicial
-    
-        id_lote = GuardarLote(id_producto, fecha_vencimiento, cantidad_inicial)
-        RETORNAR id_lote
-    
-    
-    
-    FUNCION CrearMovimiento(id_lote, tipo)
-        INGRESAR fecha_movimiento
-        MIENTRAS no formatoValido(fecha_movimiento) O fecha_movimiento > FechaActual()
-            MOSTRAR "Fecha invalida."
-            INGRESAR fecha_movimiento
-    
-        INGRESAR cantidad_movimiento
-        MIENTRAS cantidad_movimiento ≤ 0 O (tipo = 0 Y cantidad_movimiento > stockLote(id_lote))
-            MOSTRAR "Cantidad invalida."
-            INGRESAR cantidad_movimiento
-    
-        GuardarMovimiento(id_lote, tipo, fecha_movimiento, cantidad_movimiento)
-    
-        SI tipo == 0 ENTONCES
-            ActualizarCantidadLote(id_lote, -cantidad_movimiento)
-        SINO SI tipo = 1 ENTONCES
-            ActualizarCantidadLote(id_lote, cantidad_movimiento)
-    
-    
-        MOSTRAR "Movimiento registrado correctamente."
-        RETORNAR id_movimiento
-    
-    
-    
-    FUNCION CrearEgreso()
-        id_producto = SeleccionarProducto()
-        id_lote = SeleccionarLoteDisponible(id_producto)
-    
-        CrearMovimiento(id_lote, 0)  # 0 para egreso
-
-
+    INICIO FUNCION CrearMovimiento(id_lote, tipo, cantidad, id_usuario)
+        // 1.2.3.3. Ingresar fecha del movimiento
+        ESCRIBIR "Ingrese fecha del movimiento (dd/mm/aaaa) o presione Enter para usar la fecha actual:"
+        LEER fecha_movimiento // Validar formato y que no sea futura
+        SI fecha_movimiento == "" ENTONCES
+            fecha_movimiento = FECHA_ACTUAL()
+        
+        // 1.2.3.5. Guardar movimiento en la base de datos
+        GUARDAR_MOVIMIENTO_EN_BD(id_lote, id_usuario, tipo, fecha_movimiento, cantidad)
+        ESCRIBIR "Movimiento registrado correctamente en el historial."
