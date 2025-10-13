@@ -16,7 +16,7 @@ Pensamiento Computacional
 
 
 # Objetivo General
-Gestionar las cantidades de mercadería en un inventario de un almacen.
+Mantener un registro del inventario asegurando la disponibilidad de productos, mientras se facilita la auditoria por generacion de alertas y reportes
 
 # Relevamiento del control de inventario
 Un almacén en el cual se reciben, almacenan y despachan productos de distintas características.  
