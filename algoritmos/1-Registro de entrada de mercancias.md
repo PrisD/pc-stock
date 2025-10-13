@@ -90,9 +90,8 @@ Este módulo no modifica directamente la tabla stock.
                         1.2.2.5. Guardar lote en la base de datos.
     
             1.2.3. Crear movimiento de ingreso:
-                CrearMovimiento(id del lote, tipo, cantidad del lote, id_usuario):
-                    1.2.3.1 Ingresar datos del movimiento.
-                    1.2.3.2. Guardar movimiento en la base de datos.
+                CrearMovimiento(id del lote, tipo, cantidad del ingreso, id del usuario)
+                    
                     
                     
         Si el tipo es egreso:
@@ -106,7 +105,7 @@ Este módulo no modifica directamente la tabla stock.
                 - Actualizar cantidad del lote restando la cantidad retirada.
     
             1.2.3. Crear movimiento de ingreso:
-                CrearMovimiento(id del lote, tipo, cantidad del ingreso o egreso del lote, id del usuario)
+                CrearMovimiento(id del lote, tipo, cantidad del egreso del lote, id del usuario)
          
      
     Funcion CrearMovimiento(id del lote, tipo, cantidad del lote, id_usuario):
