@@ -2,16 +2,20 @@
 
 ## Objetivo del módulo
 
-- Cuando el stock de un producto sea menor a una cantidad establecida, el sistema deberá alertar al usuario que hay productos en poca cantidad.Le deberá especificar qué producto está por debajo del límite y su cantidad actual. Además deberá registrar la alerta en la base de datos.
+- Cuando el stock de un producto sea menor a una cantidad establecida, el sistema deberá alertar al usuario que hay productos en poca cantidad.Le deberá especificar qué producto está por debajo del límite y su cantidad actual. Además, deberá mostrar si es un tipo de alerta de stock bajo o stock en nivel crítico (que ya se encuentra agotado o por debajo del nivel establecido como crítico) registrar la alerta en la base de datos.
 
 ## Algoritmo
 ```pseudo
 Para cada producto en la base de datos:
    1) Obtener la cantidad actual de cada producto.
    2) Obtener el valor mínimo que debe haber del producto.
-   3) Comparar si la cantidad actual es menor al valor mínimo.
+   3) Comparar si la cantidad actual es menor al valor critico.
       - En caso afirmativo:
       4)  Lanzar alerta.
+      -Sino:
+      5) Comparar si la cantidad actual es menor al valor bajo.
+         -En caso afirmativo:
+      6) Lanzar alerta.
 ```
 ## Niveles de refinamiento
 
