@@ -56,8 +56,10 @@ El sistema abarcará las siguientes funcionalidades principales:
 # Diagrama Entidad Relación
 <img width="1077" height="695" alt="image" src="https://github.com/user-attachments/assets/1473b125-a12b-4cc3-beea-0c320e2df867" />
 
-# Diagrama de Flujo
+# Diagrama Data Warehouse
+<img width="954" height="498" alt="imagen" src="https://github.com/user-attachments/assets/7745d2d1-248a-4114-92bd-835fcf8c6bf9" />
 
+# Diagrama de Flujo
 <img width="1571" height="727" alt="image" src="https://github.com/user-attachments/assets/0cb31fcd-9dfe-4e62-8bb9-bb3610ec9ab1" />
 
 
