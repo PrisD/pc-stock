@@ -3,6 +3,24 @@
 ## Objetivo del módulo
 Tener trazabilidad de cada acción realizada por los distintos usuarios dentro del sistema en los distintos módulos contando con horarios. Poder realizar un control de movimientos, de creación de productos, de lotes, de generaciones de reportes, de entrada y salida de usuarios. Además se puede generar una auditoría a un usuario en particular en un tiempo determinado, para monitorear sus acciones. Se tiene que ver el Quien, el Qué y el Cuando. 
 
+### Input
+1. Datos de Eventos:
+   - Usuario que realiza la acción.
+   - Tipo de acción (creación, modificación, eliminación, login, logout, generación de reportes, etc.).
+   - Fecha y hora de la acción.
+   - Módulo donde se realiza la acción.
+   - Detalles adicionales (por ejemplo, producto/lote involucrado).
+
+2. Filtros de consulta:
+   - Usuario (opcional).
+   - Periodo de tiempo (opcional).
+   - Tipo de acción (opcional).
+
+### Output
+1. Auditoria filtrada:
+   - Lista de acciones realizadas por usuarios en un período específico.
+   - Detalles de cada acción (usuario, tipo de acción, fecha y hora, módulo, detalles adicionales).
+
 ### Ejemplo:
 
 | Usuario  | Acción               | Fecha y Hora        | Módulo               | Detalles                                                                       |
@@ -48,13 +66,17 @@ Tener trazabilidad de cada acción realizada por los distintos usuarios dentro d
    1.4. `fecha_hora` (timestamp)
    1.5. `módulo` (string)
    1.6. `detalles` (text)
-2. Función `registrar_accion(usuario, acción, módulo, detalles)`:
-   2.1. Obtener fecha y hora actual.
-   2.2. Insertar registro en tabla `auditoría`.
-3. Función `consultar_auditoría(filtros)`:
-   3.1. Construir consulta SQL con filtros.
-   3.2. Ejecutar consulta y obtener resultados.
-   3.3. Formatear resultados para presentación.
+2. Definir estrategia de particionamiento
+   2.1. Se particionará por meses.
+   2.2. Utiliza el campo `fecha_hora` para definir los rangos de partición.
+   2.3. Datos posteriores a 1 año se eliminaran
+3. Función `registrar_accion(usuario, acción, módulo, detalles)`:
+   3.1. Obtener fecha y hora actual.
+   3.2. Insertar registro en tabla `auditoría`.
+4. Función `consultar_auditoría(filtros)`:
+   4.1. Construir consulta SQL con filtros.
+   4.2. Ejecutar consulta y obtener resultados.
+   4.3. Formatear resultados para presentación.
 
 
 ## Pseudocódigo
@@ -89,6 +111,15 @@ Funcion consultar_auditoria(filtros):
               agregar_condición_a_consulta(clave, valor)
       resultados = ejecutar_consulta()
       return formatear_resultados(resultados)
+
+Implementación:
+    PARTICIONAR TABLA Auditoria POR RANGO (fecha_hora)
+
+// se ejecuta el primer dia de cada mes
+Proceso programado mantenimiento_auditoria()
+      fecha_limite = obtener_fecha_actual() - 1 año
+      eliminar_registros_anteriores_a(fecha_limite)
+      crear_nueva_particion_para_mes_actual()
 
 ```
 
