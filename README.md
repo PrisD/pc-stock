@@ -42,8 +42,7 @@ El sistema abarcará las siguientes funcionalidades principales:
    - Emisión de alertas cuando un producto se encuentra por debajo de su stock mínimo.
    - Registro de las alertas en la base de datos.
 5. Reportes de inventario
-   - Reportes generales de inventario.
-   - Visualización de stock actual y movimientos.
+   - Generarcion de reportes por fechas, productos y mas.
    - Exportación de informes para toma de decisiones.
 
 ## Lo que no se contempla

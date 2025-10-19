@@ -1,112 +1,183 @@
 # Reporte de inventario
 
-## Objetivo del módulo
-Generar reportes generales por periodo (dia, semana, mes, etc.) sobre el estado y movimientos del inventario para controlar existencias, analizar tendencias y apoyar la toma de decisiones para optimizar las compras, almacenamiento y distribucion.
+## Objetivo del modulo
+El objetivo principal del modulo es transformar los datos operativos del inventario en conocimiento estrategico para la toma de decisiones.
+
+Permite el analisis de rendimiento de los productos. Facilita la identificacion de tendencias de venta. Su finalidad es ofrecer metricas claras que soporten la planificacion futura, asegurando la disponibilidad de informacion consolidada sin afectar el rendimiento del sistema transaccional principal.
+
 
 
 ## Algoritmo
-1. Solicitar al usuario el periodo del que desea obtener el reporte. (dia, semana o mes)
-2. Consultar los datos requeridos de la base de datos
-3. Procesar la informacion para cada producto: stock actual, ingresos, egresos, vencimientos y comparaciones con ciclo anterior.
-4. Generar el reporte con todos los indicadores.
-5. Mostrar el reporte al usuario.
+1. INICIO
+2. Presentar al usuario las opciones de reportes disponibles.
+3. Recibir la seleccion del usuario y los parametros necesarios (ej. rango de fechas).
+4. Consultar el Data Warehouse para generar el reporte seleccionado.
+5. Generar y presentar el reporte al usuario.
+6. FIN
 
-
-## Niveles de refinamiento 
+## Refinamientos
 
 ### Nivel 1
-1. Entrada de datos
-    - Determinar tipo de periodo y su fecha inicial y final
-2. Obtencion de informacion
-    - Consultar productos
-    - Consultar lotes
-    - Consultar movimientos
-3. Procesamiento de datos
-    - Obtener stock actual
-    - Procesar ingresos y egresos, actuales y del periodo anterior
-    - Encontrar lote con vencimiento mas proximo
-4. Generacion del reporte
-    - Crear tabla de resultados con columnas | Producto | Inventario actual | Ingresos | Egresos | % Ingresos vs ciclo anterior | % Egresos vs ciclo anterior | Vencido | Lote más próximo a vencer | Fecha más próxima de vencimiento |
-5. Salida
-    - Mostrar reporte por pantalla
-    - Dar opcion a exportar el reporte a otro formato (.txt, excel, etc)
-
+1. INICIO
+2. Mostrar opciones de reportes
+    1. Ingresos por fecha por producto
+    2. Vencimientos proximos
+    3. Evolucion de stock de un producto por periodo
+3. Pedir parametros necesarios segun reporte elegido
+    1. fecha
+    2. periodo
+    3. producto
+4. Validar datos ingresados
+5. Iniciar conexion con el dw.
+6. Obtener datos.
+7. Generar reporte.
+8. Cerrar conexion con el dw.
+9. Mostrar reporte.
+10. Ofrecer exportar reporte.
+11. FIN
 
 ### Nivel 2
-1. Entrada de datos
-    - Pedir tipo de ciclo (dia, semana o mes)
-    - Pedir fecha inicial
-    - Calcular fecha final segun fecha inicial y tipo de ciclo
-2. Obtencion de informacion
-    - Obtener id de todos los productos via tabla de productos
-    - Con id de productos obtener los stock actuales via tabla de stock actual
-    - Con id de productos obtener los lotes via tabla de lotes
-    - Con id de productos obtener los movimientos del periodo actual
-    - Con id de productos obtener los movimientos del periodo anterior
-3. Procesamiento de datos
-    - Obtener stock actual
-    - Calcular ingresos = sumar todas las ingresos del periodo
-    - Calcular egresos = sumar todos los egresos del periodo
-    - Calcular relacion de ingresos respecto al periodo anterior (%)
-    - Calcular relacion de egresos respecto al periodo anterior (%)
-    - Identificar productos vencidos en el periodo
-    - Calcular relacion de vencimientos respecto al periodo anterior (%)
-    - Calcular lote con vencimiento mas proximo
-    - Obtener fecha de vencimiento mas proxima
-4. Generacion del reporte
-    - Crear tabla de resultados con columnas | Producto | Inventario actual | Ingresos | Egresos | % Ingresos vs ciclo anterior | % Egresos vs ciclo anterior | Vencido | Lote más próximo a vencer | Fecha más próxima de vencimiento |
-5. Salida
-    - Mostrar reporte por pantalla
-    - Dar opcion a exportar el reporte a otro formato (.txt, excel, etc)
+1. INICIO
+2. Presentar un menú con tres opciones de reportes:
+    1. Opción 1: Reporte de ingresos por fecha por producto.
+    2. Opción 2: Reporte de vencimientos proximos.
+    3. Opción 3: Reporte de evolucion de stock de un producto por periodo.
+3. Esperar a que el usuario seleccione una opción ingresando un numero.
+4. Según la opción seleccionada, solicitar los siguientes parametros:
+    1. Para opción 1 (ingresos por fecha por producto):
+        1. Fecha de inicio.
+        2. Fecha de fin.
+        3. Producto.
+    2. Para opción 2 (vencimientos próximos):
+        1. Rango de dias hacia adelante (por ejemplo, "15 dias")
+    3. Para opción 3 (evolucion de stock):
+        1. Tipo periodo (semana, mes, trimestre, anio).
+        2. Fecha de inicio del periodo.
+        3. Producto.
+5. Validar datos.
+6. Establecer conexion con el dw.
+7. Enviar la consulta con los parámetros correspondientes.
+8. Procesar los datos y construir el reporte en una estructura clara (tabla, grafico, etc.).
+9. Cerrar conexion con el dw.
+10. Mostrar el resultado al usuario.
+11. Preguntar al usuario si desea exportar el reporte.
+    1. Si la respuesta es si, pedir el formato deseado (PDF, Excel, etc.)
+        1. Generar y descargar el archivo
+12. FIN.
+
+
 
 ## Pseudocódigo
+```
 INICIO
 
-    // 1. Entrada de datos
-    PEDIR tipo_ciclo (día, semana, mes)
-    PEDIR fecha_inicial
-    fecha_final ← CALCULAR_FECHA_FINAL(fecha_inicial, tipo_ciclo)
-    fecha_inicial_ca ← CALCULAR_CICLO_ANTERIOR(fecha_inicial, tipo_ciclo)   // ca = ciclo anterior
-    fecha_final_ca ← CALCULAR_CICLO_ANTERIOR(fecha_final, tipo_ciclo)       // ca = ciclo anterior
 
-    // 2. Obtención de información
-    productos ← CONSULTAR tabla_productos
-    stock_actual ← CONSULTAR tabla_stock(productos)
-    lotes ← CONSULTAR tabla_lotes(productos)
-    movimientos_actual ← CONSULTAR tabla_movimientos(productos, fecha_inicial, fecha_final)
-    movimientos_anterior ← CONSULTAR tabla_movimientos(productos, fecha_inicial_ca, fecha_final_ca)
+PROCEDIMIENTO Generar_Reporte()
+    IMPRIMIR "Seleccione el tipo de reporte que desea:"
+    IMPRIMIR "Opción 1: Reporte de ingresos por fecha por producto."
+    IMPRIMIR "Opción 2: Reporte de vencimientos próximos."
+    IMPRIMIR "Opción 3: Reporte de evolucion de stock de un producto por periodo."
 
-    // 3. Procesamiento de datos
-    PARA cada producto EN productos HACER
-        stock ← stock_actual[producto]
+    PEDIR eleccion
 
-        ingresos ← SUMAR movimientos_actual.ingresos(producto)
-        egresos ← SUMAR movimientos_actual.egresos(producto)
+    SEGUN eleccion
+        CASO 1
+            PEDIR fecha_inicio
+            PEDIR fecha_fin
+            PEDIR producto
+            Validar_Fechas(fecha_inicio, fecha_fin)
+        CASO 2
+            PEDIR rango_dias
+        CASO 3
+            PEDIR tipo_periodo
+            PEDIR fecha_inicio
+            PEDIR producto
+    
+    Iniciar_Conexion_DW()
 
-        ingresos_anteriores ← SUMAR movimientos_anterior.ingresos(producto)
-        egresos_anteriores ← SUMAR movimientos_anterior.egresos(producto)
+    SEGUN eleccion
+        CASO 1
+            Validar_Producto(producto)
+            Reporte_Ingresos_Producto(fecha_inicio, fecha_fin, producto)
+        CASO 2
+            Reporte_Vencimientos(rango_dias)
+        CASO 3
+            Validar_Producto(producto)
+            Reporte_Evolucion_Stock(tipo_periodo, fecha_inicio, producto)
 
-        porcentaje_ingresos ← CALCULAR % (ingresos, ingresos_anteriores)
-        porcentaje_egresos ← CALCULAR % (egresos, egresos_anteriores)
+    Cerrar_Conexion_DW()
 
-        vencidos ← IDENTIFICAR lotes vencidos(producto, fecha_inicial, fecha_final)
-        lote_proximo ← ENCONTRAR lote con vencimiento más cercano(producto)
-        fecha_proxima ← OBTENER fecha de vencimiento más próxima(producto)
+    IMPRIMIR "En que formato desea el reporte?"
+    IMPRIMIR "1. CSV"
+    IMPRIMIR "2. PDF"
+    IMPRIMIR "3. ..."
+    PEDIR formato
 
-        AGREGAR fila a tabla_resultados con:
-            Producto, inventario, ingresos, egresos,
-            porcentaje_ingresos, porcentaje_egresos,
-            vencidos, lote_proximo, fecha_proxima
-    FIN PARA
+    Exportar_Reporte(formato)
 
-    // 4. Generación del reporte
-    CREAR tabla_resultados con las filas de cada producto
+FIN PROCEDIMIENTO
 
-    // 5. Salida
-    MOSTRAR tabla_resultados en pantalla
-    PREGUNTAR si se desea exportar
-    SI respuesta = si ENTONCES
-        PEDIR formato de exportación
-        EXPORTAR reporte en formato seleccionado (.txt, .xls, etc)
+    
+// SUB-PROCEDIMIENTOS
+
+PROCEDIMIENTO Validar_Fechas(fecha_inicio, fecha_fin)
+    SI fecha_inicio > fecha_fin
+        ERROR "La fecha de inicio no puede ser superior a la fecha de fin"
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Validar_Producto(producto)
+    SI producto no existe en DW
+        ERROR "El producto no existe"
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Iniciar_conexion_DW()
+    VARIABLE GLOBAL conexion_dw = Conectar("cadena de conexion al dw")
+    SI conexion_dw ES NULO
+        ERROR "No se pudo establecer conexion"
+    FIN SI
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Cerrar_Conexion_DW()
+    SI conexion_dw NO ES NULO
+        conexion_dw.Cerrar()
+    FIN SI   
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Reporte_Ingresos_Producto(fecha_inicio, fecha_fin, producto)
+    sql = "query"
+    VARIABLE GLOBAL ultimo_reporte_generado = Ejecutar_consulta(conexion_dw, sql)
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Reporte_Vencimientos(rango_dias)
+    sql = "query"
+    VARIABLE GLOBAL ultimo_reporte_generado = Ejecutar_consulta(conexion_dw, sql)
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Reporte_Evolucion_Stock(tipo_periodo, fecha_inicio, producto)
+    sql = "query"
+    VARIABLE GLOBAL ultimo_reporte_generado = Ejecutar_consulta(conexion_dw, sql)
+FIN PROCEDIMIENTO
+
+
+PROCEDIMIENTO Exportar_Reporte(formato)
+    SEGUN formato
+    CASO "CSV"
+        Convertir_A_CSV(ultimo_reporte_generado)
+        Guardar_Archivo("reporte.csv")
+    CASO "PDF"
+        Convertir_A_PDF(ultimo_reporte_generado)
+        Guardar_Archivo("reporte.pdf")
+    DE OTRO MODO
+        IMPRIMIR "Formato no válido."
+    FIN SEGUN
+FIN PROCEDIMIENTO
+    
 
 FIN
+```
