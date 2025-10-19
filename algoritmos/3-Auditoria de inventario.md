@@ -50,15 +50,15 @@ Tener trazabilidad de cada acción realizada por los distintos usuarios dentro d
 ## Niveles de refinamiento 
 
 ### Nivel 1
-
+```
 1. Registrar acción en una tabla de auditoría.
 2. Guardar los campos `usuario`, `acción`, `fecha_hora`, `módulo`, `detalles`.
 3. Consultar registros con filtros opcionales.
 4. Mostrar resultados en formato legible.
-
+```
 
 ### Nivel 2
-
+```
 1. Crear tabla `Auditoría` con campos:
    1.1. `id` (PK)
    1.2. `usuario` (FK a tabla usuarios)
@@ -77,7 +77,7 @@ Tener trazabilidad de cada acción realizada por los distintos usuarios dentro d
    4.1. Construir consulta SQL con filtros.
    4.2. Ejecutar consulta y obtener resultados.
    4.3. Formatear resultados para presentación.
-
+```
 
 ## Pseudocódigo
 
