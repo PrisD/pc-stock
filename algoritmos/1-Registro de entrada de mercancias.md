@@ -1,4 +1,4 @@
-# Registro de entrada y salida de mercancías
+# Registro de movimientos de mercancías
 
 ## Objetivo del módulo
 Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro de todos los movimientos de ingreso y egreso, actualizando directamente la cantidad disponible por lote para mantener un control preciso.
