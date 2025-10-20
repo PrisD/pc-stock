@@ -1,274 +1,120 @@
-# Registro de movimientos de mercancías
+# Crear Producto
 
 ## Objetivo del módulo
-Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro de todos los movimientos de ingreso y egreso, actualizando directamente la cantidad disponible por lote para mantener un control preciso.
+Crear productos a traves de un formulario para luego guardarlos en la base de datos
 
 ## Algoritmo
-    1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
-    
-        1.1 Si desea crear un producto:
-    
-            1.1- Solicitar y registrar datos del producto asociado.
-        
-        1.2- Si desea ingresar un movimiento:
-        
-            1.2.1- Seleccionar producto existente en el sistema o solicitar los datos y crear uno nuevo.
-            
-            1.2.2- Seleccionar un lote existente en el sistema o solicitar los datos y crear uno nuevo.
-    
-            1.2.3- Solicitar y registrar datos del movimiento.
+    1.  Mientas que el usuario no haya enviado el formulario:
+        1.1. Mostrar un formulario al usuario (con los campos de nombre, descripcion y stock).
+        2.1. Esperar a que el usuario presione el botón "Enviar".
+        3.1. Al recibir la accion "Enviar":
+            3.1. Obtener los datos ingresados por el usuario en los campos.
+            3.2. Validar los datos.
+            3.3. Si los datos son correctos, guardar en la base de datos, si no mostrar errores.
 
 ## Niveles de refinamiento 
 
 ### Nivel 1
-    1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
-    
-        1.1. Si el usuario desea crear un producto:
-            CrearProducto():
-                1.1.1. Ingresar datos del producto
-                1.1.2. Verificar que los datos sean válidos y que no exista duplicado.
-                1.1.3. Guardar producto en la base de datos.
-    
-        1.2. Si el usuario desea registrar un movimiento:
-    
-            Si es un ingreso:
-                RegistrarMovimiento(tipo = ingreso):
+    1.  Mostrar el formulario "Nuevo Producto" (campos: nombre, descripcion, stock minimo).
+    2.  Esperar a que el usuario presione el boton "Enviar".
+    3.  Al recibir la accion "Enviar":
+            3.1. Obtener 'nombre', 'descripcion' y 'stock_min' del formulario.
             
-            Si es un egreso:
-                RegistrarMovimiento(tipo = egreso):
-    
-        1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
-
-    2- Actualizar niveles de stock
+            3.2. Realizar validaciones del 'nombre':
+                 (Debe tener < 50 caracteres, no estar vacio y no existir en la BD).
+            3.3. Realizar validaciones de la 'descripcion':
+                 (Debe tener < 100 caracteres).
+            3.4. Realizar validaciones del 'stock_min':
+                 (Debe ser un numero entero >= 0).
+        
+            3.5. Si (las validaciones 3.2, 3.3 y 3.4 son todas correctas):
+                3.5.1. Guardar el producto en la base de datos.
+                3.5.2. Mostrar mensaje de "Producto creado".
+            3.6. Si no:
+                3.6.1. Mostrar mensaje de error indicando que campos deben corregirse.
 
 ### Nivel 2
-    1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
+    1.  Mostrar el formulario "Nuevo Producto" (campos: nombre, descripción, stock mínimo).
+    2.  Esperar a que el usuario presione el boton "Enviar".
+    3.  Al recibir la accion "Enviar":
+        3.1. Obtener 'nombre' ingresado.
+        3.2. Obtener 'descripcion' ingresada.
+        3.3. Obtener 'stock_min' ingresado.
+        3.4. Inicializar una lista de 'errores' (vacía).
+        
     
-        1.1. Si el usuario desea crear un producto:
-            CrearProducto():
-                1.1.1. Ingresar nombre del producto.
-                    1.1.1.1 . Validar que no esté vacío, que no exceda 50 caracteres y que no exista ya en la base de datos.
-                    
-                1.1.2. Ingresar descripción del producto (texto opcional, máx. 100 caracteres).
-                    1.1.2.1 . Validar que no exceda 100 caracteres.
-                    
-                1.1.3. Ingresar stock mínimo (entero mayor o igual a 0).
-                    1.1.3.1 . Validar que sea un número entero >= 0.
-                    
-                1.1.5. Si todo es válido:
-                    Guardar producto en la base de datos.
-    
-        1.2. Si el usuario desea registrar un movimiento:
-    
-            Si es un ingreso:
-                RegistrarMovimiento(tipo = ingreso):
-            
-            Si es un egreso:
-                RegistrarMovimiento(tipo = egreso):
-    
-        1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
-
-    2- Actualizarnivelesdestock()
-    
-    
-    
-    Funcion RegistrarMovimiento(tipo):
-        Si el tipo es ingreso:
-            1.2.1. Seleccionar producto:
-                - Si ya existe: elegir de la base de datos.
-                - Si es nuevo: llamar a CrearProducto().
-    
-            1.2.2. Seleccionar o crear lote:
-                - Si el lote ya existe: seleccionarlo.
-                    - Ingresar cantidad a agregar al lote.
-                    - Actualizar cantidad del lote sumando la cantidad ingresada.
-                - Si no existe: 
-                    CrearLote(id del producto):
-                        1.2.2.1. Asociar ID del producto.
-                        1.2.2.2. Ingresar fecha de ingreso:
-                            1.2.2.2.1 . Validar formato dd/mm/aaaa y que no sea futura.
-                        1.2.2.2. Ingresar fecha de vencimiento:
-                            1.2.2.2.1 . Validar formato dd/mm/aaaa y que sea futura.
-                        1.2.2.3. Ingresar cantidad inicial del lote:
-                            1.2.2.2.3.1 . Validar que sea un número entero > 0.
-                        1.2.2.4. Ingresar estado del lote = activo.
-                        1.2.2.5. Guardar lote en la base de datos.
-    
-            1.2.3. Crear movimiento de ingreso:
-                CrearMovimiento(id del lote, tipo, cantidad del ingreso, id del usuario)
-                    
-                    
-                    
-        Si el tipo es egreso:
-            1.2.1. Seleccionar producto:
-                - Elegir prodcuto de la base de datos.
-    
-            1.2.2. Seleccionar lote:
-                - Elegir lote de la base de datos con stock suficiente.
-                - ingresar cantidad a retirar del lote.
-                - validar que la cantidad a retirar no supere el stock del lote.
-                - Actualizar cantidad del lote restando la cantidad retirada.
-    
-            1.2.3. Crear movimiento de ingreso:
-                CrearMovimiento(id del lote, tipo, cantidad del egreso del lote, id del usuario)
-         
-     
-    Funcion CrearMovimiento(id del lote, tipo, cantidad del lote, id_usuario):
-        1.2.3.1 Asociar ID del usuario
-        1.2.3.1. Asociar ID del lote.
-        1.2.3.2. Asociar tipo de movimiento (egreso o ingreso).
-        1.2.3.3. Ingresar fecha del movimiento:
-            1.2.3.3.1 . Validar formato dd/mm/aaaa y que no sea futura.
-        1.2.3.4. Asociar cantidad del ingreso o egreso del lote
-    
-        1.2.3.5. Guardar movimiento en la base de datos.
+        3.5. Validar 'nombre':
+            3.5.1. Si 'nombre' está vacío:
+                   Añadir "El nombre no puede estar vacio" a 'errores'.
+            3.5.2. Si la longitud de 'nombre' > 50 caracteres:
+                   Añadir "El nombre no debe exceder los 50 caracteres" a 'errores'.
+            3.5.3. Si 'nombre' ya existe en la Base de Datos:
+                   Añadir "El producto ya existe" a 'errores'.
+                   
+        3.6. Validar 'descripcion':
+            3.6.1. Si la longitud de 'descripcion' > 100 caracteres:
+                   Añadir "La descripcion no debe exceder los 100 caracteres" a 'errores'.
+                   
+        3.7. Validar 'stock_min':
+            3.7.1. Si 'stock_min' no es un numero entero:
+                   Añadir "El stock minimo debe ser un numero entero" a 'errores'.
+            3.7.2. Si 'stock_min' es < 0:
+                   Añadir "El stock minimo debe ser mayor o igual a 0" a 'errores'.
+        
+        
+        3.8. Si la lista de 'errores' esta vacia:
+            3.8.1. Guardar (nombre, descripcion, stock_min) en la Base de Datos.
+            3.8.2. Mostrar mensaje: "Producto creado exitosamente".
+            3.8.3. Limpiar los campos del formulario.
+        3.9. Si la lista de 'errores' NO está vacía:
+            3.9.1. Mostrar los 'errores' al usuario (detallando que campos fallaron).
         
 ## Pseudocódigo
 
-    INICIO RegistroEntradasySalidas
-        
-        MIENTRAS Seguir HACER
-            ESCRIBIR "--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---"
-            ESCRIBIR "1. Crear Nuevo Producto"
-            ESCRIBIR "2. Registrar Ingreso de Mercancia"
-            ESCRIBIR "3. Registrar Egreso de Mercancia"
-            ESCRIBIR "4. Salir"
-            LEER opcion
+    1. MostrarFormularioProducto("Nuevo Producto", ["campo_nombre", "campo_descripcion", "campo_stock_min"], "boton_enviar")
     
-            SEGUN opcion HACER
-                CASO 1:
-                    LLAMAR CrearProducto()
-                CASO 2:
-                    LLAMAR RegistrarMovimiento("INGRESO")
-                CASO 3:
-                    LLAMAR RegistrarMovimiento("EGRESO")
-                CASO 4:
-                    ESCRIBIR "Saliendo del programa."
-                    Seguir = Falso
-                DE OTRO MODO:
-                    ESCRIBIR "Opcion no valida. Intente de nuevo."
+    2. Esperar a que el usuario presione el boton "Enviar".
+    
+    3. AlPresionar("boton_enviar")
+            
+        3.1 nombre = Leer("campo_nombre")
+        3.2 descripcion = Leer("campo_descripcion")
+        3.3 stock_min_texto = Leer("campo_stock_min")
 
-        ActualizarNivelesDeStock()
-    
+        3.4 Inicializar errores = [] 
+
+        3.5 Validar 'nombre'
+            3.5.1 Si EstaVacio(nombre):
+                Agregar "El nombre no puede estar vacio" a errores
             
-    
-    INICIO FUNCION CrearProducto()
-        // 1.1.1. Ingresar datos del producto
-        ESCRIBIR "Ingrese nombre del nuevo producto:"
-        LEER nombre
-        ESCRIBIR "Ingrese descripcion:"
-        LEER descripcion
-        ESCRIBIR "Ingrese stock mínimo:"
-        LEER stock_minimo
-    
-        // 1.1.4. Verificar que los datos sean validos y que no exista duplicado
-        SI nombre == "" O stock_minimo < 0 ENTONCES
-            ESCRIBIR "Error: El nombre no puede estar vacío y el stock minimo debe ser positivo."
-            RETORNAR NULO
-    
-    
-        SI BUSCAR_PRODUCTO_POR_NOMBRE(nombre) != NULO ENTONCES
-            ESCRIBIR "Error: Ya existe un producto con ese nombre."
-            RETORNAR NULO
+            3.5.2 Si Longitud(nombre) > 50:
+                Agregar "El nombre no debe exceder los 50 caracteres" a errores
         
-    
-        // 1.1.5. Guardar producto en la base de datos
-        nuevo_producto = GUARDAR_PRODUCTO_EN_BD(nombre, descripcion, stock_minimo)
-        ESCRIBIR "Producto creado con exito."
-        RETORNAR nuevo_producto
-    
-    
-    
-    INICIO FUNCION RegistrarMovimiento(tipo)
-        // 1.2.1. Seleccionar producto
-        ESCRIBIR "Ingrese el nombre del producto para el movimiento:"
-        LEER nombre_producto
-        producto = BUSCAR_PRODUCTO_POR_NOMBRE(nombre_producto)
-    
-        SI producto == NULO ENTONCES
-            SI tipo == "INGRESO" ENTONCES
-                ESCRIBIR "Producto no encontrado. Desea crearlo ahora? (S/N)"
-                LEER respuesta
-                SI respuesta == "S" ENTONCES
-                    producto = LLAMAR CrearProducto()
-                    SI producto == NULO ENTONCES
-                        ESCRIBIR "Error al crear producto. Operacion cancelada."
-                        RETORNAR
-                    
-                SINO
-                    ESCRIBIR "Operación cancelada."
-                    RETORNAR
-                
-            SINO // Es un EGRESO
-                ESCRIBIR "Error: No se puede dar salida a un producto que no existe."
-                RETORNAR
+        3.5.3 Si ExisteEnBaseDeDatos(nombre):
+                Agregar "El producto ya existe" a errores
             
-    
-        // 1.2.2. Seleccionar lote
-        ESCRIBIR "Ingrese el código del lote:"
-        LEER codigo_lote
-        lote = BUSCAR_LOTE_POR_CODIGO(producto.id, codigo_lote)
-    
-        ESCRIBIR "Ingrese la cantidad (unidades):"
-        LEER cantidad_movimiento
-    
-        SI tipo == "INGRESO" ENTONCES
-            SI lote != NULO ENTONCES // El lote ya existe
-                nueva_cantidad = lote.cantidad + cantidad_movimiento
-                ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
-                ESCRIBIR "Stock del lote existente actualizado."
-                
-            SINO // El lote es nuevo
-                lote = LLAMAR CrearLote(producto.id, codigo_lote, cantidad_movimiento)
-                SI lote == NULO ENTONCES
-                    ESCRIBIR "Error creando el lote. Operacion cancelada."
-                    RETORNAR
-                
-        SINO // tipo es EGRESO
-            SI lote == NULO ENTONCES
-                ESCRIBIR "Error: El lote no existe. No se puede registrar el egreso."
-                RETORNAR
-            
-            SI cantidad_movimiento > lote.cantidad ENTONCES
-                ESCRIBIR "Error: Stock insuficiente en el lote. Disponible: ", lote.cantidad
-                RETORNAR
-            
-            nueva_cantidad = lote.cantidad - cantidad_movimiento
-            ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
-            ESCRIBIR "Stock del lote actualizado."
+
+        3.6: Validar 'descripcion'
+            3.6.1 Si Longitud(descripcion) > 100 :
+                Agregar "La descripcion no debe exceder los 100 caracteres" a errores
+
+        3.7: Validar 'stock_min'
+
+            3.7.1 Si No EsNumeroEntero(stock_min_texto) :
+                    Agregar "El stock minimo debe ser un numero entero" a errores
+                Sino
+                    stock_min_num = ConvertirAEntero(stock_min_texto)
+                    es_valido_entero = Verdadero
         
-    
-        // 1.2.3. Crear el registro del movimiento
-        LLAMAR CrearMovimiento(lote.id, tipo, cantidad_movimiento, ID_USUARIO_LOGUEADO)
-        
-    
-    
-    INICIO FUNCION CrearLote(id_producto, codigo_lote, cantidad_inicial)
-        // 1.2.2.2. Ingresar fechas
-        ESCRIBIR "Ingrese fecha de ingreso (dd/mm/aaaa):"
-        LEER fecha_ingreso // Validar formato y que no sea futura
-        ESCRIBIR "Ingrese fecha de vencimiento (dd/mm/aaaa):"
-        LEER fecha_vencimiento // Validar formato y que sea futura
-        
-        // 1.2.2.3. Validar cantidad
-        SI cantidad_inicial <= 0 ENTONCES
-            ESCRIBIR "Error: la cantidad inicial debe ser mayor a 0."
-            RETORNAR NULO  
-    
-        // 1.2.2.5. Guardar lote en la base de datos
-        nuevo_lote = GUARDAR_LOTE_EN_BD(id_producto, codigo_lote, fecha_ingreso, fecha_vencimiento, cantidad_inicial, "activo")
-        ESCRIBIR "Lote nuevo creado."
-        RETORNAR nuevo_lote
-    
-    
-    
-    INICIO FUNCION CrearMovimiento(id_lote, tipo, cantidad, id_usuario)
-        // 1.2.3.3. Ingresar fecha del movimiento
-        ESCRIBIR "Ingrese fecha del movimiento (dd/mm/aaaa) o presione Enter para usar la fecha actual:"
-        LEER fecha_movimiento // Validar formato y que no sea futura
-        SI fecha_movimiento == "" ENTONCES
-            fecha_movimiento = FECHA_ACTUAL()
-        
-        // 1.2.3.5. Guardar movimiento en la base de datos
-        GUARDAR_MOVIMIENTO_EN_BD(id_lote, id_usuario, tipo, fecha_movimiento, cantidad)
-        ESCRIBIR "Movimiento registrado correctamente en el historial."
+            3.7.2 Si es_valido_entero Y stock_min_num < 0 :
+                    Agregar "El stock minimo debe ser mayor o igual a 0" a errores
+
+
+
+        3.8 Si EstaVacia(errores) :
+            3.8.1 GuardarEnBaseDeDatos(nombre, descripcion, stock_min_num)
+            3.8.2 MostrarMensaje("Producto creado exitosamente")
+            3.8.3 LimpiarCamposDelFormulario()
+             
+        3.9 Sino
+            3.9.1 MostrarErroresEnFormulario(errores)
