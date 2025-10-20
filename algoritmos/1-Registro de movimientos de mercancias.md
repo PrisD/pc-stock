@@ -39,6 +39,8 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
     
         1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
 
+    2- Actualizar niveles de stock
+
 ### Nivel 2
     1- Repetir mientras el usuario quiera ingresar movimientos o crear productos:
     
@@ -65,6 +67,8 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
                 RegistrarMovimiento(tipo = egreso):
     
         1.4 Preguntar al usuario si desea continuar ingresando movimientos o creando productos.
+
+    2- Actualizarnivelesdestock()
     
     
     
@@ -123,7 +127,7 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
 
     INICIO RegistroEntradasySalidas
         
-        MIENTRAS VERDADERO HACER
+        MIENTRAS Seguir HACER
             ESCRIBIR "--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---"
             ESCRIBIR "1. Crear Nuevo Producto"
             ESCRIBIR "2. Registrar Ingreso de Mercancia"
@@ -140,10 +144,11 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
                     LLAMAR RegistrarMovimiento("EGRESO")
                 CASO 4:
                     ESCRIBIR "Saliendo del programa."
-                    SALIR_DEL_BUCLE
+                    Seguir = Falso
                 DE OTRO MODO:
                     ESCRIBIR "Opcion no valida. Intente de nuevo."
-            
+
+        ActualizarNivelesDeStock()
     
             
     
