@@ -80,7 +80,7 @@ INICIO
 PROCEDIMIENTO Generar_Reporte()
     IMPRIMIR "Seleccione el tipo de reporte que desea:"
     IMPRIMIR "Opción 1: Reporte de ingresos por fecha por producto."
-    IMPRIMIR "Opción 2: Reporte de vencimientos próximos."
+    IMPRIMIR "Opción 2: Reporte de vencimientos por fecha."
     IMPRIMIR "Opción 3: Reporte de evolucion de stock de un producto por periodo."
 
     PEDIR eleccion
@@ -95,8 +95,11 @@ PROCEDIMIENTO Generar_Reporte()
             PEDIR producto
             Validar_producto(producto)
         CASO 2
-            PEDIR rango_dias
-            VALIDAR rango_dias
+            PEDIR fecha_inicio
+            Validar_fecha(fecha_inicio)
+            PEDIR fecha_fin
+            Validar_fecha(fecha_fin)
+            Validar_Fechas(fecha_inicio, fecha_fin)
         CASO 3
             PEDIR tipo_periodo
             PEDIR fecha_inicio
@@ -162,7 +165,7 @@ PROCEDIMIENTO Reporte_Ingresos_Producto(fecha_inicio, fecha_fin, producto)
 FIN PROCEDIMIENTO
 
 
-PROCEDIMIENTO Reporte_Vencimientos(rango_dias)
+PROCEDIMIENTO Reporte_Vencimientos(fecha_inicio, fecha_fin)
     sql = "query"
     VARIABLE GLOBAL ultimo_reporte_generado = Ejecutar_consulta(conexion_dw, sql)
 FIN PROCEDIMIENTO
