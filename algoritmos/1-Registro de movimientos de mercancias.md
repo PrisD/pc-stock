@@ -126,7 +126,7 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
         
         
         INICIO FUNCION RegistrarMovimiento(tipo)
-            // 1.2.1. Seleccionar producto
+            // 1. Seleccionar producto
             ESCRIBIR "Ingrese el codigo del producto para el movimiento:"
             LEER codigo_producto
             producto = BUSCAR_PRODUCTO_POR_CODIGO(codigo_producto)
@@ -148,47 +148,58 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
                 SINO // Es un EGRESO
                     ESCRIBIR "Error: No se puede dar salida a un producto que no existe."
                     RETORNAR
-                
-        
-            ESCRIBIR "Ingrese el código del lote:"
-            LEER codigo_lote
-            lote = BUSCAR_LOTE_POR_CODIGO(producto.id, codigo_lote)
-        
-            ESCRIBIR "Ingrese la cantidad (unidades):"
-            LEER cantidad_movimiento
-        
+
+    
+            //2. Seleccionar lote
+            
             SI tipo == "INGRESO" ENTONCES
-                SI lote != NULO ENTONCES // El lote ya existe
-                    nueva_cantidad = lote.cantidad + cantidad_movimiento
-                    ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
-                    ESCRIBIR "Stock del lote existente actualizado."
-                    
-                SINO // El lote es nuevo
-                    lote = LLAMAR CrearLote(producto.id, codigo_lote, cantidad_movimiento)
+                ESCRIBIR "Ingrese el código del lote o presione ENTER para crear uno nuevo"
+                LEER codigo_lote
+                SI codigo_lote == NULO:
+                    lote = LLAMAR CrearLote(producto.id)
                     SI lote == NULO ENTONCES
                         ESCRIBIR "Error creando el lote. Operacion cancelada."
                         RETORNAR
+
+                SINO // Se ingreso un codigo de lote
+                    lote = BUSCAR_LOTE_POR_CODIGO(codigo_lote)
+                    SI lote != NULO ENTONCES // El lote ya existe
+                        ESCRIBIR "Ingrese la cantidad a ingresar al lote (unidades):"
+                        LEER cantidad_movimiento
+                        nueva_cantidad = lote.cantidad + cantidad_movimiento
+                        ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
+                        ESCRIBIR "Stock del lote existente actualizado."
                     
+                    SINO
+                        ESCRIBIR "Error en el ingreso del codigo, lote no existente"
+                        
             SINO // tipo es EGRESO
+                ESCRIBIR "Ingrese el código del lote"
+                LEER codigo_lote
+                lote = BUSCAR_LOTE_POR_CODIGO(codigo_lote)
                 SI lote == NULO ENTONCES
                     ESCRIBIR "Error: El lote no existe. No se puede registrar el egreso."
                     RETORNAR
+
+                // Si llega hasta aca, es porque encontro el lote
+                ESCRIBIR "Ingrese la cantidad a ingresar al lote (unidades):"
+                LEER cantidad_movimiento
                 
                 SI cantidad_movimiento > lote.cantidad ENTONCES
                     ESCRIBIR "Error: Stock insuficiente en el lote. Disponible: ", lote.cantidad
                     RETORNAR
-                
-                nueva_cantidad = lote.cantidad - cantidad_movimiento
-                ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
-                ESCRIBIR "Stock del lote actualizado."
+                SINO
+                    nueva_cantidad = lote.cantidad - cantidad_movimiento
+                    ACTUALIZAR_CANTIDAD_LOTE_EN_BD(lote.id, nueva_cantidad)
+                    ESCRIBIR "Stock del lote actualizado."
             
         
-            // 1.2.3. Crear el registro del movimiento
+            //3. Crear el registro del movimiento
             LLAMAR CrearMovimiento(lote.id, tipo, cantidad_movimiento, ID_USUARIO_LOGUEADO)
         
         
         INICIO FUNCION CrearMovimiento(id_lote, tipo, cantidad, id_usuario)
-            // 1.2.3.3. Ingresar fecha del movimiento
+            // 1. Ingresar fecha del movimiento
             ESCRIBIR "Ingrese fecha del movimiento (dd/mm/aaaa) o presione Enter para usar la fecha actual:"
             LEER fecha_movimiento // Validar formato y que no sea futura
             SI fecha_movimiento == "" ENTONCES
