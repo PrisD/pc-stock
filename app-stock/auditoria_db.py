@@ -5,10 +5,10 @@ from zoneinfo import ZoneInfo
 
 class AuditoriaDB:
     def __init__(self, db_name='stock.db'):
-        # Asegurarse que la base de datos se crea en el directorio correcto
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
         self.conn = None
         self.cursor = None
+        self.connect()
         
     def connect(self):
         """Establece la conexión con la base de datos"""
@@ -19,18 +19,8 @@ class AuditoriaDB:
         """Cierra la conexión con la base de datos"""
         if self.conn:
             self.conn.close()
-            
-    def setup_database(self):
-        """Configura la base de datos con el esquema inicial"""
-        with open(os.path.join(os.path.dirname(__file__), 'schema.sql'), 'r') as f:
-            self.cursor.executescript(f.read())
-        self.conn.commit()
-            
-    def login(self, nombre):
-        """Verifica si existe un usuario y retorna su ID"""
-        self.cursor.execute('SELECT id_usuario FROM Usuario WHERE nombre = ?', (nombre,))
-        result = self.cursor.fetchone()
-        return result[0] if result else None
+            self.conn = None
+            self.cursor = None
     
     def registrar_auditoria(self, id_usuario, accion, modulo, detalle=None):
         """Registra una acción en la tabla de auditoría"""
