@@ -153,10 +153,11 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
             //2. Seleccionar lote
             
             SI tipo == "INGRESO" ENTONCES
-                ESCRIBIR "Ingrese el código del lote o presione ENTER para crear uno nuevo"
+                ESCRIBIR "Ingrese el código del lote o presione ENTER para cargar uno nuevo"
                 LEER codigo_lote
-                SI codigo_lote == NULO:
+                SI codigo_lote == "":
                     lote = LLAMAR CrearLote(producto.id)
+                    cantidad_movimiento = lote.cantidad
                     SI lote == NULO ENTONCES
                         ESCRIBIR "Error creando el lote. Operacion cancelada."
                         RETORNAR
@@ -182,7 +183,7 @@ Módulo para gestionar el ciclo de vida del inventario, permitiendo el registro 
                     RETORNAR
 
                 // Si llega hasta aca, es porque encontro el lote
-                ESCRIBIR "Ingrese la cantidad a ingresar al lote (unidades):"
+                ESCRIBIR "Ingrese la cantidad a retirar del lote (unidades):"
                 LEER cantidad_movimiento
                 
                 SI cantidad_movimiento > lote.cantidad ENTONCES
