@@ -12,7 +12,7 @@ Permite el analisis de rendimiento de los productos. Facilita la identificacion 
 2. Presentar al usuario las opciones de reportes disponibles.
 3. Recibir la seleccion del usuario y los parametros necesarios (ej. rango de fechas).
 4. Consultar el Data Warehouse para generar el reporte seleccionado.
-5. Generar y presentar el reporte al usuario.
+5. Generar el reporte al usuario.
 6. FIN
 
 ## Refinamientos
@@ -25,16 +25,17 @@ Permite el analisis de rendimiento de los productos. Facilita la identificacion 
     3. Evolucion de stock de un producto por periodo
 3. Pedir parametros necesarios segun reporte elegido
     1. fecha
-    2. periodo
-    3. producto
-4. Validar datos ingresados
-5. Iniciar conexion con el dw.
-6. Obtener datos.
-7. Generar reporte.
-8. Cerrar conexion con el dw.
-9. Mostrar reporte.
-10. Ofrecer exportar reporte.
-11. FIN
+    2. Validar fecha
+    3. periodo
+    4. Validar periodo
+    5. producto
+    6. Validar producto
+4. Iniciar conexion con el dw.
+5. Obtener datos.
+6. Generar reporte.
+7. Cerrar conexion con el dw.
+8. Ofrecer exportar reporte.
+9. FIN
 
 ### Nivel 2
 1. INICIO
@@ -46,24 +47,28 @@ Permite el analisis de rendimiento de los productos. Facilita la identificacion 
 4. Según la opción seleccionada, solicitar los siguientes parametros:
     1. Para opción 1 (ingresos por fecha por producto):
         1. Fecha de inicio.
-        2. Fecha de fin.
-        3. Producto.
+        2. Validar fecha de inicio
+        3. Fecha de fin.
+        4. Validar fecha de fin
+        5. Producto.
+        6. Validar producto
     2. Para opción 2 (vencimientos próximos):
         1. Rango de dias hacia adelante (por ejemplo, "15 dias")
+        2. Validar rango
     3. Para opción 3 (evolucion de stock):
         1. Tipo periodo (semana, mes, trimestre, anio).
         2. Fecha de inicio del periodo.
-        3. Producto.
-5. Validar datos.
-6. Establecer conexion con el dw.
-7. Enviar la consulta con los parámetros correspondientes.
-8. Procesar los datos y construir el reporte en una estructura clara (tabla, grafico, etc.).
-9. Cerrar conexion con el dw.
-10. Mostrar el resultado al usuario.
-11. Preguntar al usuario si desea exportar el reporte.
-    1. Si la respuesta es si, pedir el formato deseado (PDF, Excel, etc.)
-        1. Generar y descargar el archivo
-12. FIN.
+        3. Validar fecha de inicio del periodo
+        4. Producto.
+        4. Validar producto.
+5. Establecer conexion con el dw.
+6. Enviar la consulta con los parámetros correspondientes.
+7. Procesar los datos y construir el reporte en una estructura clara (tabla, grafico, etc.).
+8. Cerrar conexion con el dw.
+10. Preguntar al usuario el formato para exportar el reporte.
+    1. Pedir el formato deseado (PDF, Excel, etc.)
+        1. Generar y descargar el archivo.
+11. FIN.
 
 
 
@@ -83,26 +88,30 @@ PROCEDIMIENTO Generar_Reporte()
     SEGUN eleccion
         CASO 1
             PEDIR fecha_inicio
+            Validar_fecha(fecha_inicio)
             PEDIR fecha_fin
-            PEDIR producto
+            Validar_fecha(fecha_fin)
             Validar_Fechas(fecha_inicio, fecha_fin)
+            PEDIR producto
+            Validar_producto(producto)
         CASO 2
             PEDIR rango_dias
+            VALIDAR rango_dias
         CASO 3
             PEDIR tipo_periodo
             PEDIR fecha_inicio
+            Validar_fecha(fecha_inicio)
             PEDIR producto
+            Validar_producto(producto)
     
     Iniciar_Conexion_DW()
 
     SEGUN eleccion
         CASO 1
-            Validar_Producto(producto)
             Reporte_Ingresos_Producto(fecha_inicio, fecha_fin, producto)
         CASO 2
             Reporte_Vencimientos(rango_dias)
         CASO 3
-            Validar_Producto(producto)
             Reporte_Evolucion_Stock(tipo_periodo, fecha_inicio, producto)
 
     Cerrar_Conexion_DW()
