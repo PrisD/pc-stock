@@ -1,14 +1,14 @@
 
 -- Tabla DIMPRODUCTOS
-CREATE TABLE dim_productos (
+CREATE TABLE IF NOT EXISTS dim_productos (
     id_producto INTEGER PRIMARY KEY,
-    nombre_producto VARCHAR(50,)
+    nombre_producto VARCHAR(50),
     descripcion_producto VARCHAR(100),
-    stock_minimo INTEGER,
+    stock_minimo INTEGER
 );
 
 -- Tabla DIMTIEMPO
-CREATE TABLE dim_tiempo (
+CREATE TABLE IF NOT EXISTS dim_tiempo (
     id_fecha INTEGER PRIMARY KEY,
     fecha_completa DATETIME NOT NULL,
     dia INTEGER NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE dim_tiempo (
 );
 
 -- Tabla FACTMOVIMIENTOS
-CREATE TABLE fact_movimientos (
+CREATE TABLE IF NOT EXISTS fact_movimientos (
     id_producto INTEGER NOT NULL,
     id_fecha INTEGER NOT NULL,
     cantidad_ingresos INTEGER,
@@ -35,7 +35,7 @@ CREATE TABLE fact_movimientos (
 
 
 -- Tabla FACTSTOCKDIARIOS
-CREATE TABLE fact_stock_diario (
+CREATE TABLE IF NOT EXISTS fact_stock_diario (
     id_producto INTEGER NOT NULL,
     id_fecha INTEGER NOT NULL,
     stock_final_del_dia INTEGER NOT NULL,
@@ -44,4 +44,4 @@ CREATE TABLE fact_stock_diario (
 
     FOREIGN KEY (id_producto) REFERENCES dim_productos(id_producto),
     FOREIGN KEY (id_fecha) REFERENCES dim_tiempo(id_fecha)
-)
+);
