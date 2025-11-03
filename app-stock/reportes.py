@@ -1,28 +1,79 @@
 import sqlite3
 import os
 import utils
+import pandas as pd
 
-class Reportes:
+class Reporte:
     def __init__(self, db_name='dw.db'):
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
         self.conn = None
         self.cursor = None
 
     def iniciar_conexion_dw(self):
-        self.conn = sqlite3.connect(self.db_path)
-        self.cursor = self.conn.cursor()
+        try:
+            self.conn = sqlite3.connect(self.db_path)
+            self.cursor = self.conn.cursor()
+        except sqlite3.Error as e:
+            print(f"Error: {e}")
+            raise
 
     def cerrar_conexion_dw(self):
         if self.conn:
             self.conn.close()
             self.conn = None
             self.cursor = None
+            print("--- Conexion con DW cerrada ---") # para depuracion por el momento
 
-    def validar_producto_dw(self, prodcuto):
-        pass
+    def __enter__(self):
+        self.iniciar_conexion_dw()
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cerrar_conexion_dw()
+        if exc_type:
+            print(f"Error durante ejecucion del reporte: {exc_value}")
 
+    # Valida que un producto exista en DW. Asume que la conexion ya esta abierta. Devuelve TRUE/FALSE
+    def validar_producto_dw(self, id_producto):
+        if not self.cursor:
+            raise ConnectionError("La conexion no esta iniciada.")
+        
+        try:
+            query = "SELECT 1 FROM dim_productos WHERE id_producto = ? LIMIT 1" # La idea de la query es que si encuentra una coincidencia devuelva un 1 para simplificar respuesta
+            self.cursor.execute(query, (id_producto))
+            return self.cursor.fetchone() is not None # Si la respuesta no es vacia (None) entonces es que se encontro una coincidencia
+        except sqlite3.Error as e:
+            print(f"Error al validar el producto: {e}")
+            return False
+
+    # Ejecuta la consulta y devuelve los resultados como un dataframe de pandas
     def reporte_ingresos_egresos_producto(self, fecha_inicio, fecha_fin, producto):
-        pass
+        if not self.cursor:
+            raise ConnectionError("La conexion no esta iniciada.")
+        
+        query = """
+            SELECT
+                p.nombre_producto,
+                t.fecha_completa,
+                m.cantidad_ingresos,
+                m.cantidad_egresos
+            FROM fact_movimientos m
+            JOIN dim_productos p ON m.id_producto = p.id_producto
+            JOIN dim_tiempo t ON m.id_fecha = t.id_fecha
+            WHERE
+                p.id_producto = ?
+                AND t.fecha_completa BETWEEN ? AND ?
+            ORDER BY t.fecha_completa;
+        """
+        params = (producto, fecha_inicio, fecha_fin)
+
+        try:
+            df_reporte = pd.read_sql_query(query, self.conn, params=params)
+            df_reporte['neto'] = df_reporte['cantidad_ingresos'] - df_reporte['cantidad_egresos']
+            return df_reporte
+        except Exception as e:
+            print(f"Error al generar reporte con pandas: {e}")
+            return pd.DataFrame() # devuelvo un dataframe vacio en caso de error
 
     def reporte_vencimientos(self, fecha_inicio, fecha_fin):
         pass
@@ -30,8 +81,22 @@ class Reportes:
     def reporte_evolucion_stock(self, tipo_periodo, fecha_inicio, producto):
         pass
 
-    def exportar_reporte(self, formato): # DETERMINAR SI SE ELIJE ANTES O DESPUES DE GENERAR
-        pass
+    def exportar_reporte(self, df, formato , nombre_archivo="reporte"): # DETERMINAR SI SE ELIJE ANTES O DESPUES DE GENERAR
+        if df.empty:
+            print("no hay datos para expotar")
+            return
+        
+        try:
+            match formato.lower():
+                case "csv":
+                    nombre = f"{nombre_archivo}.csv"
+                    df.to_csv(nombre, index=False)
+                    print(f"reporte {nombre} exportado exitosamente")
+                
+                case _:
+                    print(f"Formato {formato} no soportado")
+        except Exception as e:
+            print(f"Error al exportar: {e}")
 
 
     def generar_reporte(self):
@@ -49,8 +114,11 @@ class Reportes:
                 fecha_fin = input("Ingrese la fecha de fin: ") # FALTA REPETIR MIENTRAS FALLE
                 utils.validar_fecha(fecha_fin)
                 utils.validar_rango_fechas(fecha_inicio, fecha_fin)
-                producto = input("ingrese el prodcuto: ") # FALTA REPETIR MIENTRAS FALLE
-                self.validar_producto_dw(producto)
+                producto = input("ingrese el producto: ") # FALTA REPETIR MIENTRAS FALLE
+                
+                if not self.validar_producto_dw(producto):
+                    print(f"Error al validar {producto} en el data warehouse.")
+                    return # detengo la generacion del reporte
             
             case "2":
                 fecha_inicio = input("Ingrese la fecha de inicio: ")
@@ -60,25 +128,52 @@ class Reportes:
                 utils.validar_rango_fechas(fecha_inicio, fecha_fin)
 
             case "3":
-                periodo = input("ingrese periodo: ") # FALTA MOSTRAR OPCIONES Y REPETIR MIENTRAS FALLE
+                print("Determine el periodo que desea visualizar")
+                print("1. Dia")
+                print("2. Semana")
+                print("3. Mes")
+                print("4. Año")
+                periodo = input("ingrese periodo: ") # FALTA REPETIR MIENTRAS FALLE
                 fecha_fin = input("Ingrese la fecha de fin: ")
                 utils.validar_fecha(fecha_fin) # FALTA REPETIR MIENTRAS FALLE
-                producto = input("ingrese el prodcuto: ") # FALTA REPETIR MIENTRAS FALLE
-                self.validar_producto_dw(producto)
+                producto = input("ingrese el producto: ") # FALTA REPETIR MIENTRAS FALLE
 
-        self.iniciar_conexion_dw()
+                if not self.validar_producto_dw(producto):
+                    print(f"Error al validar {producto} en el data warehouse.")
+                    return 
+            
+            case _:
+                print("Opcion no valida")
+                return
+
+        df_reporte = pd.DataFrame() # preparo un dataframe vacio
 
         match eleccion:
             case "1":
-                self.reporte_ingresos_egresos_producto(fecha_inicio, fecha_fin, producto)
+                fecha_inicio_sql = f"{fecha_inicio} 00:00:00"
+                fecha_fin_sql = f"{fecha_fin} 23:59:59"
+                df_reporte = self.reporte_ingresos_egresos_producto(fecha_inicio_sql, fecha_fin_sql, producto)
             
             case "2":
-                self.reporte_vencimientos(fecha_inicio, fecha_fin)
+                fecha_inicio_sql = f"{fecha_inicio} 00:00:00"
+                fecha_fin_sql = f"{fecha_fin} 23:59:59"
+                df_reporte = self.reporte_vencimientos(fecha_inicio_sql, fecha_fin_sql)
             
             case "3":
-                self.reporte_evolucion_stock(periodo, fecha_fin, producto)
+                fecha_fin_sql = f"{fecha_fin} 23:59:59"
+                df_reporte = self.reporte_evolucion_stock(periodo, fecha_fin, producto)
 
-        self.cerrar_conexion_dw()
+        if not df_reporte.empty:
+            print("\n --- Vista previa de las primeras 5 filas ---")
+            print(df_reporte.head())
+            print("-----------------------------------------------")
+
+            formato = input(" en que formato desea exportar? solo csv por ahora")
+            nombre_archivo = input("ingrese el nombre para el archivo (sin extension): ")
+
+            self.exportar_reporte(df_reporte, formato, nombre_archivo)
+        else:
+            print("no se generaron los datos para el reporte")
 
 
 

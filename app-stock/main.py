@@ -1,6 +1,7 @@
 from auditoria.auditoria_db import AuditoriaDB
 from auditoria.auditoria_ui import mostrar_consulta_auditoria
 from login import LoginManager
+from reportes import Reporte
 from actualizacion_stock import iniciar_actualizacion_stock, actualizar_stock
 from alerta_de_stock_bajo import verificar_stock
 import sqlite3
@@ -84,7 +85,13 @@ def main():
                     input("\nPresione Enter para volver al menú...")
 
                 case "5":
-                    modulo_en_construccion("Visualizar Reporte")
+                    handler_de_reportes = Reporte('dw.db')
+                    try:
+                        with handler_de_reportes as r:
+                            r.generar_reporte()
+                    except ConnectionError as e:
+                        print(f"No se pudo iniciar el modulo de reportes: {e}")
+                        
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "CONSULTA", "REPORTE", "Visualizó reporte (en construcción)")
                     input("\nPresione Enter para volver al menú...")
