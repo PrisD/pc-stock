@@ -54,7 +54,8 @@ El sistema abarcará las siguientes funcionalidades principales:
 ---
 
 # Diagrama Entidad Relación
-<img width="1077" height="695" alt="image" src="https://github.com/user-attachments/assets/1473b125-a12b-4cc3-beea-0c320e2df867" />
+<img width="1028" height="710" alt="image" src="https://github.com/user-attachments/assets/94ba69a5-ebe1-4614-a9d0-8f04b06a6cd9" />
+
 
 # Diagrama Data Warehouse
 <img width="954" height="498" alt="imagen" src="https://github.com/user-attachments/assets/7745d2d1-248a-4114-92bd-835fcf8c6bf9" />
