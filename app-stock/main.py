@@ -1,4 +1,5 @@
-from auditoria_db import AuditoriaDB
+from auditoria.auditoria_db import AuditoriaDB
+from auditoria.auditoria_ui import mostrar_consulta_auditoria
 from login import LoginManager
 from actualizacion_stock import iniciar_actualizacion_stock, actualizar_stock
 from alerta_de_stock_bajo import verificar_stock
@@ -31,7 +32,7 @@ def main():
     conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "stock.db"))
     cursor = conn.cursor()
 
-    auditoria = AuditoriaDB()
+    auditoria = AuditoriaDB() 
     login_manager = LoginManager()
     usuario_actual = None
     iniciar_actualizacion_stock(conn, cursor)
@@ -68,10 +69,12 @@ def main():
                         usuario_actual[0], "CONSULTA", "STOCK", "Consultó stock actual (en construcción)")
                     input("\nPresione Enter para volver al menú...")
 
+                # 2. CASE 3 ACTUALIZADO
                 case "3":
                     clear_screen()
-                    auditoria.mostrar_auditorias(usuario_actual[0])
+                    mostrar_consulta_auditoria(auditoria, usuario_actual[0])
                     input("\nPresione Enter para volver al menú...")
+                # --- Fin de la modificación ---
 
                 case "4":
                     modulo_en_construccion("Consultar Alertas de Stock Bajo")
