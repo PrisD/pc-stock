@@ -46,6 +46,8 @@ class Reporte:
             print(f"Error al validar el producto: {e}")
             return False
 
+
+
     # Ejecuta la consulta y devuelve los resultados como un dataframe de pandas
     def reporte_ingresos_egresos_producto(self, fecha_inicio, fecha_fin, producto):
         if not self.cursor:
@@ -75,8 +77,40 @@ class Reporte:
             print(f"Error al generar reporte con pandas: {e}")
             return pd.DataFrame() # devuelvo un dataframe vacio en caso de error
 
+
+
     def reporte_vencimientos(self, fecha_inicio, fecha_fin):
-        pass
+        if not self.cursor:
+            raise ConnectionError("La conexion no esta iniciada.")
+        
+        query = """
+            SELECT
+                p.nombre_producto,
+                SUM(m.cantidad_vencidos) AS total_vencidos
+            FROM
+                fact_movimientos m
+            JOIN
+                dim_productos p ON m.id_producto = p.id_producto
+            JOIN
+                dim_tiempo t ON m.id_fecha = t.id_fecha
+            WHERE
+                t.fecha_completa BETWEEN ? AND ?
+                AND m.cantidad_vencidos > 0
+            GROUP BY
+                p.nombre_producto
+            ORDER BY
+                total_vencidos DESC;
+        """
+        params = (fecha_inicio, fecha_fin)
+
+        try:
+            df_reporte = pd.read_sql_query(query, self.conn, params=params)
+            return df_reporte
+        except Exception as e:
+            print(f"Error al generar reporte con pandas: {e}")
+            return pd.DataFrame() # devuelvo un dataframe vacio en caso de error
+
+
 
     def reporte_evolucion_stock(self, tipo_periodo, fecha_inicio, producto):
         pass
