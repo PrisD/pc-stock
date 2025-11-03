@@ -70,7 +70,7 @@ Tener trazabilidad de cada acción realizada por los distintos usuarios dentro d
    2.1. Se particionará por meses.
    2.2. Utiliza el campo `fecha_hora` para definir los rangos de partición.
    2.3. Datos posteriores a 1 año se eliminaran
-3. Función `registrar_accion(usuario, acción, módulo, detalles)`:
+3. Función `registrar_auditoria(usuario, acción, módulo, detalles)`:
    3.1. Obtener fecha y hora actual.
    3.2. Insertar registro en tabla `auditoría`.
 4. Función `consultar_auditoría(filtros)`:
@@ -94,7 +94,7 @@ Definir Filtro :
    clave: cadena
    valor: cadena o nulo
 
-Función registrar_accion(usuario, acción, módulo, detalles):
+Función registrar_auditoria(usuario, acción, módulo, detalles):
       fecha_hora = obtener_fecha_hora_actual()
       auditoria = {
           "usuario": usuario,
@@ -105,7 +105,7 @@ Función registrar_accion(usuario, acción, módulo, detalles):
       }
       insertar(auditoria)
 
-Funcion consultar_auditoria(filtros):
+Funcion mostrar_consulta_auditoria(filtros):
       for clave, valor in filtros:
           if valor no es nulo:
               agregar_condición_a_consulta(clave, valor)

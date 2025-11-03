@@ -43,15 +43,6 @@ class AuditoriaDB:
         except sqlite3.Error as e:
             print(f"Error al registrar auditoría: {e}")
             self.conn.rollback()
-            
-    def obtener_auditorias_todas(self):
-        self.cursor.execute('''
-            SELECT a.fecha_hora, u.nombre, a.accion, a.modulo, a.detalle
-            FROM Auditoria a
-            JOIN Usuario u ON a.id_usuario = u.id_usuario
-            ORDER BY a.fecha_hora DESC
-        ''')
-        return self.cursor.fetchall()
 
     def obtener_periodos_disponibles(self):
         self.cursor.execute("""
