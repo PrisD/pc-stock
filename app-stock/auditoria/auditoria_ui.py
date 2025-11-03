@@ -25,6 +25,31 @@ def _seleccionar_periodo(db: AuditoriaDB):
         except ValueError:
             print("Entrada inválida. Ingrese un número.")
 
+def _seleccionar_dia(db: AuditoriaDB, anio: str, mes: str):
+    opcion = input("\n¿Desea filtrar por un día específico? (s/n): ").strip().lower()
+    if opcion != 's':
+        return None, "Todos"
+
+    dias = db.obtener_dias_disponibles(anio, mes)
+    if not dias:
+        print("No se encontraron días con registros para este mes.")
+        return None, "Todos"
+
+    print("\nDías disponibles:")
+    for i, dia in enumerate(dias, start=1):
+        print(f"{i}. {dia}")
+
+    while True:
+        try:
+            seleccion = int(input("Seleccione el número del día: ").strip())
+            if 1 <= seleccion <= len(dias):
+                dia_sel = dias[seleccion - 1]
+                return dia_sel, dia_sel
+            else:
+                print("Número inválido. Intente nuevamente.")
+        except ValueError:
+            print("Entrada inválida. Ingrese un número.")
+
 def _seleccionar_usuario(db: AuditoriaDB):
     opcion = input("¿Desea filtrar por un usuario específico? (s/n): ").strip().lower()
     if opcion != 's':
@@ -78,15 +103,16 @@ def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
     anio, mes = _seleccionar_periodo(db)
     if anio is None:
         return # No hay registros para mostrar
-
     # --- 2. SELECCIONAR FILTROS OPCIONALES ---
+    dia_filtro, nombre_dia_filtro = _seleccionar_dia(db, anio, mes)
     id_usuario_filtro, nombre_usuario_filtro = _seleccionar_usuario(db)
     accion_filtro, nombre_accion_filtro = _seleccionar_accion(db)
 
-    # --- 3. OBTENER DATOS FILTRADOS ---
+    # --- 3. OBTENER DATOS FILTRADOS  ---
     filas = db.obtener_auditorias_filtradas(
         anio=anio, 
         mes=mes, 
+        dia=dia_filtro,
         id_usuario=id_usuario_filtro, 
         accion=accion_filtro
     )
@@ -95,6 +121,7 @@ def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
     nombre_mes_seleccionado = _obtener_nombre_mes(mes)
     print(f"\n=== REGISTROS DE AUDITORÍA ===")
     print(f"Período: {nombre_mes_seleccionado} {anio}")
+    print(f"Día:     {nombre_dia_filtro}") # <-- Línea nueva
     print(f"Usuario: {nombre_usuario_filtro}")
     print(f"Acción:  {nombre_accion_filtro}")
     print("=" * 30)
@@ -112,7 +139,7 @@ def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
 
     # --- 5. REGISTRAR LA CONSULTA ---
     try:
-        detalle_log = f"Consultó registros de {mes}/{anio}. Filtros: Usuario='{nombre_usuario_filtro}', Acción='{nombre_accion_filtro}'"
+        detalle_log = f"Consultó registros de {mes}/{anio}. Filtros: Día='{nombre_dia_filtro}', Usuario='{nombre_usuario_filtro}', Acción='{nombre_accion_filtro}'"
         db.registrar_auditoria(id_usuario_actual, "CONSULTA", "AUDITORIA", detalle_log)
     except Exception:
         pass

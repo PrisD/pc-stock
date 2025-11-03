@@ -52,10 +52,10 @@ class AuditoriaDB:
         """)
         return self.cursor.fetchall()
 
-    def obtener_auditorias_filtradas(self, anio, mes, id_usuario=None, accion=None):
+    def obtener_auditorias_filtradas(self, anio, mes, dia=None, id_usuario=None, accion=None):
         """
         Obtiene auditorías filtrando por período (obligatorio)
-        y opcionalmente por usuario y/o acción.
+        y opcionalmente por día, usuario y/o acción.
         """
         
         query_base = '''
@@ -63,13 +63,21 @@ class AuditoriaDB:
             FROM Auditoria a
             JOIN Usuario u ON a.id_usuario = u.id_usuario
         '''
+        
+        # Filtros base obligatorios
         filtros = [
             "strftime('%Y', a.fecha_hora) = ?",
             "strftime('%m', a.fecha_hora) = ?"
         ]
         parametros = [anio, mes]
 
-        # Añadir filtros opcionales
+        # --- INICIO DE MODIFICACIÓN ---
+        # Añadir filtro de día opcional
+        if dia is not None:
+            filtros.append("strftime('%d', a.fecha_hora) = ?")
+            parametros.append(dia)
+        # --- FIN DE MODIFICACIÓN ---
+
         if id_usuario is not None:
             filtros.append("a.id_usuario = ?")
             parametros.append(id_usuario)
@@ -77,6 +85,7 @@ class AuditoriaDB:
         if accion is not None:
             filtros.append("a.accion = ?")
             parametros.append(accion)
+            
         query_completa = query_base + " WHERE " + " AND ".join(filtros) + " ORDER BY a.fecha_hora DESC"
 
         self.cursor.execute(query_completa, parametros)
@@ -103,3 +112,14 @@ class AuditoriaDB:
         # Lo convertimos a una lista simple: ['LOGIN', 'CONSULTA']
         return [row[0] for row in self.cursor.fetchall()]
 
+    def obtener_dias_disponibles(self, anio, mes):
+        """Devuelve los días con registros para un mes y año específicos."""
+        self.cursor.execute("""
+            SELECT DISTINCT strftime('%d', fecha_hora)
+            FROM Auditoria
+            WHERE strftime('%Y', fecha_hora) = ? AND strftime('%m', fecha_hora) = ?
+            ORDER BY 1
+        """, (anio, mes))
+        # Convertimos [('01',), ('05',)] en ['01', '05']
+        return [row[0] for row in self.cursor.fetchall()]
+    
