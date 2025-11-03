@@ -22,7 +22,7 @@ class LoginManager:
 
     def _verificar_usuario(self, nombre):
         """Verifica si existe un usuario y retorna su ID y nombre"""
-        self.cursor.execute('SELECT id_usuario FROM Usuario WHERE nombre = ?', (nombre,))
+        self.cursor.execute('SELECT id_usuario FROM usuarios WHERE nombre = ?', (nombre,))
         result = self.cursor.fetchone()
         if result:
             return result[0], nombre

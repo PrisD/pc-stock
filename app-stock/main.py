@@ -37,7 +37,7 @@ def main():
     auditoria = AuditoriaDB() 
     login_manager = LoginManager()
     usuario_actual = None
-    iniciar_actualizacion_stock(conn, cursor)
+    #iniciar_actualizacion_stock(conn, cursor)
 
     while True:
         if usuario_actual is None:

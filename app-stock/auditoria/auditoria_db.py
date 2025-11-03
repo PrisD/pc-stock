@@ -36,7 +36,7 @@ class AuditoriaDB:
         fecha_hora = self._get_current_timestamp()
         try:
             self.cursor.execute('''
-                INSERT INTO Auditoria (id_usuario, accion, modulo, detalle, fecha_hora)
+                INSERT INTO auditorias (id_usuario, accion, modulo, detalle, fecha_hora)
                 VALUES (?, ?, ?, ?, ?)
             ''', (id_usuario, accion, modulo, detalle, fecha_hora))
             self.conn.commit()
@@ -47,7 +47,7 @@ class AuditoriaDB:
     def obtener_periodos_disponibles(self):
         self.cursor.execute("""
             SELECT DISTINCT strftime('%Y', fecha_hora) AS anio, strftime('%m', fecha_hora) AS mes
-            FROM Auditoria
+            FROM auditorias
             ORDER BY anio DESC, mes DESC
         """)
         return self.cursor.fetchall()
@@ -60,8 +60,8 @@ class AuditoriaDB:
         
         query_base = '''
             SELECT a.fecha_hora, u.nombre, a.accion, a.modulo, a.detalle
-            FROM Auditoria a
-            JOIN Usuario u ON a.id_usuario = u.id_usuario
+            FROM auditorias a
+            JOIN usuarios u ON a.id_usuario = u.id_usuario
         '''
         
         # Filtros base obligatorios
@@ -95,8 +95,8 @@ class AuditoriaDB:
         """Devuelve usuarios que existen en la tabla de auditoría."""
         self.cursor.execute("""
             SELECT DISTINCT u.id_usuario, u.nombre
-            FROM Auditoria a
-            JOIN Usuario u ON a.id_usuario = u.id_usuario
+            FROM auditorias a
+            JOIN usuarios u ON a.id_usuario = u.id_usuario
             ORDER BY u.nombre
         """)
         return self.cursor.fetchall()
@@ -105,7 +105,7 @@ class AuditoriaDB:
         """Devuelve todas las acciones únicas registradas."""
         self.cursor.execute("""
             SELECT DISTINCT accion
-            FROM Auditoria
+            FROM auditorias
             ORDER BY accion
         """)
         # .fetchall() devuelve tuplas, ej: [('LOGIN',), ('CONSULTA',)]
@@ -116,7 +116,7 @@ class AuditoriaDB:
         """Devuelve los días con registros para un mes y año específicos."""
         self.cursor.execute("""
             SELECT DISTINCT strftime('%d', fecha_hora)
-            FROM Auditoria
+            FROM auditorias
             WHERE strftime('%Y', fecha_hora) = ? AND strftime('%m', fecha_hora) = ?
             ORDER BY 1
         """, (anio, mes))

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- Tabla PRODUCTOS
 CREATE TABLE IF NOT EXISTS productos (
     id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(100) NOT NULL,
     stock_bajo INTEGER NOT NULL,
     stock_critico INTEGER NOT NULL
@@ -46,12 +47,12 @@ CREATE TABLE IF NOT EXISTS alertas (
 CREATE TABLE IF NOT EXISTS movimientos (
     id_movimiento INTEGER PRIMARY KEY AUTOINCREMENT,
     id_lote INTEGER NOT NULL,
-    id_producto INTEGER NOT NULL,
+    id_usuario INTEGER NOT NULL,
     tipo INTEGER NOT NULL CHECK (tipo IN (0,1)),
     cantidad INTEGER NOT NULL,
     fecha DATETIME NOT NULL DEFAULT (DATETIME('now')),
     FOREIGN KEY (id_lote) REFERENCES lotes(id_lote),
-    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
 -- Tabla AUDITORIAS
