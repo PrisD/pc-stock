@@ -2,6 +2,7 @@ import sqlite3
 import os
 import utils
 import pandas as pd
+from datetime import datetime, timedelta
 
 class Reporte:
     def __init__(self, db_name='dw.db'):
@@ -47,8 +48,8 @@ class Reporte:
             return False
 
 
-
-    # Ejecuta la consulta y devuelve los resultados como un dataframe de pandas
+    # TODOS LOS REPORTES EJECUTARAN LA CONSULTA Y DEVUELVEN UN DATAFRAME DE PANDAS COMO RESPUESTA
+      
     def reporte_ingresos_egresos_producto(self, fecha_inicio, fecha_fin, producto):
         if not self.cursor:
             raise ConnectionError("La conexion no esta iniciada.")
@@ -87,19 +88,14 @@ class Reporte:
             SELECT
                 p.nombre_producto,
                 SUM(m.cantidad_vencidos) AS total_vencidos
-            FROM
-                fact_movimientos m
-            JOIN
-                dim_productos p ON m.id_producto = p.id_producto
-            JOIN
-                dim_tiempo t ON m.id_fecha = t.id_fecha
+            FROM fact_movimientos m
+            JOIN dim_productos p ON m.id_producto = p.id_producto
+            JOIN dim_tiempo t ON m.id_fecha = t.id_fecha
             WHERE
                 t.fecha_completa BETWEEN ? AND ?
                 AND m.cantidad_vencidos > 0
-            GROUP BY
-                p.nombre_producto
-            ORDER BY
-                total_vencidos DESC;
+            GROUP BY p.nombre_producto
+            ORDER BY total_vencidos DESC;
         """
         params = (fecha_inicio, fecha_fin)
 
@@ -112,10 +108,52 @@ class Reporte:
 
 
 
-    def reporte_evolucion_stock(self, tipo_periodo, fecha_inicio, producto):
-        pass
+    def reporte_evolucion_stock(self, tipo_periodo, fecha_fin, producto):
+        if not self.cursor:
+            raise ConnectionError("La conexion no esta iniciada.")
+        
+        fecha_fin_obj = datetime.strptime(fecha_fin, '%Y-%m-%d')
 
-    def exportar_reporte(self, df, formato , nombre_archivo="reporte"): # DETERMINAR SI SE ELIJE ANTES O DESPUES DE GENERAR
+        match tipo_periodo:
+            case "1": 
+                dias_restar = 7 # semana
+            case "2": 
+                dias_restar = 30 # mes
+            case "3": 
+                dias_restar = 90 # trimestre
+            case "4": 
+                dias_restar = 365 # anio
+        
+        fecha_inicio_obj = fecha_fin_obj - timedelta(days=dias_restar)
+
+        fecha_inicio_sql = fecha_inicio_obj.strftime('%Y-%m-%d 00:00:00')
+        fecha_fin_sql = fecha_fin_obj.strftime('%Y-%m-%d 23:59:59')
+
+        query = """
+            SELECT
+                t.fecha_completa,
+                p.nombre_producto,
+                f.stock_final_del_dia
+            FROM fact_stock_diario f
+            JOIN dim_productos p ON f.id_producto = p.id_producto
+            JOIN dim_tiempo t ON f.id_fecha = t.id_fecha
+            WHERE
+                p.id_producto = ?
+                AND t.fecha_completa BETWEEN ? AND ?
+            ORDER BY
+                t.fecha_completa ASC;
+        """
+        params = (producto, fecha_inicio_sql, fecha_fin_sql)
+        try:
+            df_reporte = pd.read_sql_query(query, self.conn, params=params)
+            return df_reporte
+        except Exception as e:
+            print(f"Error al generar reporte con pandas: {e}")
+            return pd.DataFrame()
+
+        
+
+    def exportar_reporte(self, df, formato , nombre_archivo="reporte"):
         if df.empty:
             print("no hay datos para expotar")
             return
@@ -143,9 +181,9 @@ class Reporte:
 
         match eleccion:
             case "1":
-                fecha_inicio = input("Ingrese la fecha de inicio: ") # FALTA REPETIR MIENTRAS FALLE
+                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ") # FALTA REPETIR MIENTRAS FALLE
                 utils.validar_fecha(fecha_inicio)
-                fecha_fin = input("Ingrese la fecha de fin: ") # FALTA REPETIR MIENTRAS FALLE
+                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ") # FALTA REPETIR MIENTRAS FALLE
                 utils.validar_fecha(fecha_fin)
                 utils.validar_rango_fechas(fecha_inicio, fecha_fin)
                 producto = input("ingrese el producto: ") # FALTA REPETIR MIENTRAS FALLE
@@ -155,20 +193,20 @@ class Reporte:
                     return # detengo la generacion del reporte
             
             case "2":
-                fecha_inicio = input("Ingrese la fecha de inicio: ")
+                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ")
                 utils.validar_fecha(fecha_inicio)
-                fecha_fin = input("Ingrese la fecha de fin: ")
+                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
                 utils.validar_fecha(fecha_fin)
                 utils.validar_rango_fechas(fecha_inicio, fecha_fin)
 
             case "3":
                 print("Determine el periodo que desea visualizar")
-                print("1. Dia")
-                print("2. Semana")
-                print("3. Mes")
+                print("1. Semana")
+                print("2. Mes")
+                print("3. Trimestre")
                 print("4. Año")
                 periodo = input("ingrese periodo: ") # FALTA REPETIR MIENTRAS FALLE
-                fecha_fin = input("Ingrese la fecha de fin: ")
+                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
                 utils.validar_fecha(fecha_fin) # FALTA REPETIR MIENTRAS FALLE
                 producto = input("ingrese el producto: ") # FALTA REPETIR MIENTRAS FALLE
 
@@ -194,7 +232,6 @@ class Reporte:
                 df_reporte = self.reporte_vencimientos(fecha_inicio_sql, fecha_fin_sql)
             
             case "3":
-                fecha_fin_sql = f"{fecha_fin} 23:59:59"
                 df_reporte = self.reporte_evolucion_stock(periodo, fecha_fin, producto)
 
         if not df_reporte.empty:
@@ -202,7 +239,7 @@ class Reporte:
             print(df_reporte.head())
             print("-----------------------------------------------")
 
-            formato = input(" en que formato desea exportar? solo csv por ahora")
+            formato = input("En que formato desea exportar? solo csv por ahora: ")
             nombre_archivo = input("ingrese el nombre para el archivo (sin extension): ")
 
             self.exportar_reporte(df_reporte, formato, nombre_archivo)
