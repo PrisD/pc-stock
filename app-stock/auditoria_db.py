@@ -43,24 +43,66 @@ class AuditoriaDB:
         return self.cursor.fetchall()
 
     def mostrar_auditorias(self, id_usuario=None):
-        """Obtiene e imprime los registros de auditoría formateados.
+        """Muestra las auditorías de un mes y año seleccionados."""
 
-        Si se pasa id_usuario, registra la acción de consulta automáticamente.
-        """
-        filas = self.obtener_auditorias()
-        # Imprimir encabezado
-        print("=== REGISTROS DE AUDITORÍA ===")
+        # === SELECCIÓN DE PERÍODO ===
+        print("=== CONSULTA DE AUDITORÍAS ===")
+
+        # Mostrar los meses y años disponibles en la base de datos
+        self.cursor.execute("""
+            SELECT DISTINCT strftime('%Y', fecha_hora) AS anio, strftime('%m', fecha_hora) AS mes
+            FROM Auditoria
+            ORDER BY anio DESC, mes DESC
+        """)
+        periodos = self.cursor.fetchall()
+
+        if not periodos:
+            print("No hay registros de auditoría disponibles.\n")
+            return
+
+        print("\nPeríodos disponibles:")
+        for i, (anio, mes) in enumerate(periodos, start=1):
+            nombre_mes = datetime.strptime(mes, "%m").strftime("%B").capitalize()
+            print(f"{i}. {nombre_mes} {anio}")
+
+        # Elegir un período
+        while True:
+            try:
+                seleccion = int(input("\nSeleccione el número del período a consultar: ").strip())
+                if 1 <= seleccion <= len(periodos):
+                    anio, mes = periodos[seleccion - 1]
+                    break
+                else:
+                    print("Número inválido. Intente nuevamente.")
+            except ValueError:
+                print("Entrada inválida. Ingrese un número.")
+
+        # === CONSULTAR AUDITORÍAS DEL PERÍODO SELECCIONADO ===
+        self.cursor.execute('''
+            SELECT a.fecha_hora, u.nombre, a.accion, a.modulo, a.detalle
+            FROM Auditoria a
+            JOIN Usuario u ON a.id_usuario = u.id_usuario
+            WHERE strftime('%Y', a.fecha_hora) = ? AND strftime('%m', a.fecha_hora) = ?
+            ORDER BY a.fecha_hora DESC
+        ''', (anio, mes))
+
+        filas = self.cursor.fetchall()
+
+        print(f"\n=== REGISTROS DE AUDITORÍA - {datetime.strptime(mes, '%m').strftime('%B').capitalize()} {anio} ===")
+        if not filas:
+            print("No se encontraron registros para este período.\n")
+            return
+
         print("\nFecha/Hora | Usuario | Acción | Módulo | Detalle")
-        print("-" * 80)
+        print("-" * 100)
 
         for registro in filas:
             fecha, nombre, accion, modulo, detalle = registro
-            print(f"{fecha} | {nombre:8} | {accion:6} | {modulo:7} | {detalle}")
+            print(f"{fecha} | {nombre:10} | {accion:10} | {modulo:10} | {detalle or ''}")
 
-        # Registrar la consulta si nos pasan un usuario
+        # Registrar la consulta en la auditoría
         if id_usuario is not None:
             try:
-                self.registrar_auditoria(id_usuario, "CONSULTA", "AUDITORIA", "Consultó registros de auditoría")
+                self.registrar_auditoria(id_usuario, "CONSULTA", "AUDITORIA", f"Consultó registros de {mes}/{anio}")
             except Exception:
-                # No queremos que la impresión falle si la auditoría no se puede registrar
                 pass
