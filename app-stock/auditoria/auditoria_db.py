@@ -52,12 +52,54 @@ class AuditoriaDB:
         """)
         return self.cursor.fetchall()
 
-    def obtener_auditorias_por_periodo(self, anio, mes):
-        self.cursor.execute('''
+    def obtener_auditorias_filtradas(self, anio, mes, id_usuario=None, accion=None):
+        """
+        Obtiene auditorías filtrando por período (obligatorio)
+        y opcionalmente por usuario y/o acción.
+        """
+        
+        query_base = '''
             SELECT a.fecha_hora, u.nombre, a.accion, a.modulo, a.detalle
             FROM Auditoria a
             JOIN Usuario u ON a.id_usuario = u.id_usuario
-            WHERE strftime('%Y', a.fecha_hora) = ? AND strftime('%m', a.fecha_hora) = ?
-            ORDER BY a.fecha_hora DESC
-        ''', (anio, mes))
+        '''
+        filtros = [
+            "strftime('%Y', a.fecha_hora) = ?",
+            "strftime('%m', a.fecha_hora) = ?"
+        ]
+        parametros = [anio, mes]
+
+        # Añadir filtros opcionales
+        if id_usuario is not None:
+            filtros.append("a.id_usuario = ?")
+            parametros.append(id_usuario)
+            
+        if accion is not None:
+            filtros.append("a.accion = ?")
+            parametros.append(accion)
+        query_completa = query_base + " WHERE " + " AND ".join(filtros) + " ORDER BY a.fecha_hora DESC"
+
+        self.cursor.execute(query_completa, parametros)
         return self.cursor.fetchall()
+    
+    def obtener_usuarios_con_registros(self):
+        """Devuelve usuarios que existen en la tabla de auditoría."""
+        self.cursor.execute("""
+            SELECT DISTINCT u.id_usuario, u.nombre
+            FROM Auditoria a
+            JOIN Usuario u ON a.id_usuario = u.id_usuario
+            ORDER BY u.nombre
+        """)
+        return self.cursor.fetchall()
+
+    def obtener_acciones_disponibles(self):
+        """Devuelve todas las acciones únicas registradas."""
+        self.cursor.execute("""
+            SELECT DISTINCT accion
+            FROM Auditoria
+            ORDER BY accion
+        """)
+        # .fetchall() devuelve tuplas, ej: [('LOGIN',), ('CONSULTA',)]
+        # Lo convertimos a una lista simple: ['LOGIN', 'CONSULTA']
+        return [row[0] for row in self.cursor.fetchall()]
+
