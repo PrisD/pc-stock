@@ -1,4 +1,5 @@
 from datetime import datetime
+import sqlite3
 
 # ------------------ "BASES DE DATOS" EN MEMORIA ------------------
 
@@ -26,44 +27,23 @@ def pedir_fecha(mensaje="Ingrese una fecha (dd/mm/aaaa): ", permitir_hoy=True, f
 
             # Validar si se permiten fechas futuras
             if not permitir_futuras and fecha > datetime.today():
-                print("❌ Error: La fecha no puede ser futura.")
+                print(" Error: La fecha no puede ser futura.")
                 continue
 
             return fecha
 
         except ValueError:
-            print(f"❌ Error: Ingrese una fecha válida en el formato {formato}.")
+            print(f" Error: Ingrese una fecha válida en el formato {formato}.")
 
 
 # ---------------------------PRODUCTOS------------------------------------
 
-def CrearProducto():
+def CrearProducto(conn, cursor):
     print("\n--- CREAR PRODUCTO ---")
-
-    # ---------------- VALIDAR NOMBRE ----------------
-    while True:
-        nombre = input("Nombre del producto: ").strip()
-
-        if nombre == "":
-            print("Error: El nombre no puede estar vacío.\n")
-            continue
-
-        if len(nombre) > 50:
-            print("Error: El nombre no debe exceder los 50 caracteres.\n")
-            continue
-        
-        # Validar si ya existe el producto (comparando por nombre)
-        nombre_ya_existe = any(p["nombre"].lower() == nombre.lower() for p in productos.values())
-        if nombre_ya_existe:
-            print("Error: El producto ya existe.\n")
-            continue
-
-        break  # Nombre válido
-
 
     # ---------------- VALIDAR DESCRIPCIÓN ----------------
     while True:
-        descripcion = input("Descripción (opcional, máx 100 caracteres): ").strip()
+        descripcion = input("Descripción (máx 100 caracteres): ").strip()
 
         if len(descripcion) > 100:
             print("Error: La descripción no debe exceder los 100 caracteres.\n")
@@ -110,15 +90,22 @@ def CrearProducto():
     id_producto = len(productos) + 1
 
     # ---------------- GUARDAR EN "BASE DE DATOS" ----------------
-    productos[id_producto] = {
-        "nombre": nombre,
-        "descripcion": descripcion,
-        "stock_bajo": stock_min, 
-        "stock_critico": stock_critico, 
-    }
+    try:
+        cursor.execute("""
+            INSERT INTO productos (descripcion, stock_bajo, stock_critico)
+            VALUES (?, ?, ?)
+        """, (descripcion, stock_min, stock_critico))
+        conn.commit()
 
-    print(f"\n Producto '{nombre}' creado correctamente con ID {id_producto}.\n")
-    return id_producto
+        id_producto = cursor.lastrowid  # Recupera el ID asignado automáticamente
+
+        print(f"\n Producto '{descripcion}' creado correctamente con ID {id_producto}.\n")
+        return id_producto
+
+    except sqlite3.Error as e:
+        print(f"\n Error al guardar el producto: {e}\n")
+        conn.rollback()
+        return None
 
 
 
@@ -127,30 +114,38 @@ def cortar(texto, max_len):
     return texto if len(texto) <= max_len else texto[:max_len-3] + "..."
 
 
-def ListarProductos():
+def ListarProductos(conn, cursor):
     print("\n--- LISTADO DE PRODUCTOS ---")
 
-    if not productos:
-        print("No hay productos cargados.\n")
-        return
+    try:
+        cursor.execute("SELECT id_producto, descripcion, stock_bajo, stock_critico FROM productos")
+        productos = cursor.fetchall()
 
-    # Encabezado
-    print(f"{'ID':<5} {'Nombre':<25} {'Descripción':<35} {'Stock Min':<12} {'Stock Crítico'}")
-    print("-" * 90)
+        if not productos:
+            print("No hay productos cargados.\n")
+            return
 
-    for id_prod, prod in productos.items():
-        nombre = cortar(prod['nombre'], 25)
-        descripcion = cortar(prod['descripcion'], 35)
+        # Encabezado
+        print(f"{'ID':<5} {'Descripción':<35} {'Stock Bajo':<12} {'Stock Crítico':<12}")
+        print("-" * 70)
 
-        print(f"{id_prod:<5} {nombre:<25} {descripcion:<35} {prod['stock_bajo']:<12} {prod['stock_critico']}")
+        # Filas
+        for prod in productos:
+            id_producto, descripcion, stock_bajo, stock_critico = prod
+            descripcion_corta = cortar(descripcion, 35)
+            print(f"{id_producto:<5} {descripcion_corta:<35} {stock_bajo:<12} {stock_critico:<12}")
 
-    print()
+        print()
+
+    except Exception as e:
+        print(f" Error al listar productos: {e}\n")
+
 
 
 
 # ---------------------------LOTES------------------------------------
 
-def CrearLote(id_producto):
+def CrearLote(conn,cursor,id_producto):
     print("\n--- CREAR LOTE ---")
 
     # ---------------- ID LOTES ----------------
@@ -197,42 +192,69 @@ def CrearLote(id_producto):
 
 
     # ---------------- GUARDAR EN "BASE DE DATOS" ----------------
-    lotes[id_lote] = {
-        "id_producto": id_producto,
-        "cantidad": cantidad,
-        "fecha_ingreso": fecha_ingreso,
-        "fecha_vencimiento": fecha_vencimiento,
-        "estado": "activo"
-    }
+    try:
+        cursor.execute("""
+            INSERT INTO lotes (id_producto, fecha_ingreso, cantidad, estado, fecha_vencimiento)
+            VALUES (?, DATE(?), ?, ?, DATE(?))
+        """, (id_producto, fecha_ingreso.strftime("%Y-%m-%d"), cantidad, "activo", fecha_vencimiento.strftime("%Y-%m-%d")))
+        conn.commit()
 
-    print(f"\nLote '{id_lote}' creado correctamente para el producto {id_producto}.\n")
-    return id_lote
+        id_lote = cursor.lastrowid
+        print(f"\n Lote '{id_lote}' creado correctamente para el producto {id_producto}.\n")
+        return id_lote
+
+    except Exception as e:
+        print(f" Error al crear el lote: {e}\n")
+        conn.rollback()
+        return None
 
 
     # ---------------- LISTAR LOTES----------------
-def ListarLotes():
+def ListarLotes(conn, cursor):
     print("\n--- LISTADO DE LOTES ---")
 
-    if not lotes:
-        print("No hay lotes cargados.\n")
-        return
+    try:
+        cursor.execute("""
+            SELECT id_lote, id_producto, cantidad, fecha_ingreso, fecha_vencimiento, estado
+            FROM lotes
+        """)
+        lotes = cursor.fetchall()
 
-    # Encabezado
-    print(f"{'ID Lote':<10} {'ID Prod':<10} {'Cantidad':<10} {'F. Ingreso':<15} {'F. Vencimiento':<17} {'Estado'}")
-    print("-" * 70)
+        if not lotes:
+            print("No hay lotes cargados.\n")
+            return
 
-    for id_lote, lote in lotes.items():
-        fecha_ingreso_str = lote['fecha_ingreso'].strftime("%d/%m/%Y")
-        fecha_vencimiento_str = lote['fecha_vencimiento'].strftime("%d/%m/%Y")
-        print(f"{id_lote:<10} {lote['id_producto']:<10} {lote['cantidad']:<10} {fecha_ingreso_str:<12} {fecha_vencimiento_str:<12} {lote['estado']}")
+        # Encabezado
+        print(f"{'ID Lote':<10} {'ID Prod':<10} {'Cantidad':<10} {'F. Ingreso':<15} {'F. Vencimiento':<17} {'Estado'}")
+        print("-" * 80)
 
-    print()
+        for id_lote, id_prod, cantidad, fecha_ing, fecha_vto, estado in lotes:
+            try:
+                fecha_ing_dt = datetime.fromisoformat(fecha_ing)
+                fecha_ing_str = fecha_ing_dt.strftime("%d/%m/%Y")
+            except Exception:
+                fecha_ing_str = fecha_ing  # por si viene ya formateada
 
+            if fecha_vto:
+                try:
+                    fecha_vto_dt = datetime.fromisoformat(fecha_vto)
+                    fecha_vto_str = fecha_vto_dt.strftime("%d/%m/%Y")
+                except Exception:
+                    fecha_vto_str = fecha_vto
+            else:
+                fecha_vto_str = "-"
+
+            print(f"{id_lote:<10} {id_prod:<10} {cantidad:<10} {fecha_ing_str:<15} {fecha_vto_str:<17} {estado}")
+
+        print()
+
+    except Exception as e:
+        print(f" Error al listar lotes: {e}\n")
 
 
 # ---------------------------  CREAR MOVIMIENTOS------------------------------------
 
-def CrearMovimiento(id_lote, tipo, cantidad, id_usuario):
+def CrearMovimiento(conn,cursor,id_lote,id_producto, tipo, cantidad):
     print("\n--- REGISTRAR MOVIMIENTO ---")
 
     # 1) Obtener fecha actual directamente
@@ -243,52 +265,58 @@ def CrearMovimiento(id_lote, tipo, cantidad, id_usuario):
         permitir_futuras=False
     )
 
-    # 2) Generar ID de movimiento (siguiente número)
-    id_movimiento = len(movimientos) + 1
+    # 2) Guardar en la base de datos
+    try:
+        cursor.execute("""
+            INSERT INTO movimientos (id_lote, id_producto, tipo, cantidad, fecha)
+            VALUES (?, ?, ?, ?, ?)
+        """, (id_lote, id_producto, tipo, cantidad, fecha.strftime("%Y-%m-%d")))
+        conn.commit()
 
-    # 3) Guardar en la "base de datos"
-    movimientos.append({
-        "id_movimiento": id_movimiento,
-        "id_lote": id_lote,
-        "tipo": tipo,
-        "cantidad": cantidad,
-        "fecha": fecha,
-        "id_usuario": id_usuario
-    })
+        id_movimiento = cursor.lastrowid
+        print(f"Movimiento {id_movimiento} registrado correctamente.\n")
+        return id_movimiento
 
-    print(f"Movimiento {id_movimiento} registrado correctamente.\n")
-    return id_movimiento
+    except Exception as e:
+        print(f"Error al registrar el movimiento: {e}")
+        conn.rollback()
+        return None
 
 
     # ---------------- LISTAR MOVIMIENTOS ---------------
-def ListarMovimientos():
+def ListarMovimientos(conn, cursor):
     print("\n--- LISTADO DE MOVIMIENTOS ---")
+    try:
+        cursor.execute("""
+            SELECT id_movimiento, id_lote, id_producto, tipo, cantidad, fecha
+            FROM movimientos
+            ORDER BY id_movimiento
+        """)
+        movimientos = cursor.fetchall()
 
-    if not movimientos:
-        print("No hay movimientos registrados.\n")
-        return
+        if not movimientos:
+            print("No hay movimientos registrados.\n")
+            return
 
-    # Encabezado
-    print(f"{'ID Mov':<10} {'ID Lote':<10} {'Tipo':<10} {'Cantidad':<10} {'Fecha':<12} {'ID Usuario':<12}")
-    print("-" * 65)
+        # Encabezado
+        print(f"{'ID Mov':<10} {'ID Lote':<10} {'ID Prod':<10} {'Tipo':<6} {'Cantidad':<10} {'Fecha':<12}")
+        print("-" * 65)
 
-    for movimiento in movimientos:
-        fecha_str = movimiento['fecha'].strftime("%d/%m/%Y")
-        print(f"{movimiento['id_movimiento']:<10} "
-              f"{movimiento['id_lote']:<10} "
-              f"{movimiento['tipo']:<10} "
-              f"{movimiento['cantidad']:<10} "
-              f"{fecha_str:<12} "
-              f"{movimiento['id_usuario']:<12}")
+        for id_mov, id_lote, id_prod, tipo, cantidad, fecha in movimientos:
+            fecha_str = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d/%m/%Y")
+            tipo_str = "Ingreso" if tipo == 1 else "Egreso"
+            print(f"{id_mov:<10} {id_lote:<10} {id_prod:<10} {tipo_str:<6} {cantidad:<10} {fecha_str:<12}")
 
-    print()
+        print()
+
+    except Exception as e:
+        print(f"Error al listar movimientos: {e}\n")
 
 
 
 # ---------------------------REGISTRAR MOVIMIENTOS------------------------------------
-def RegistrarMovimiento(tipo):
+def RegistrarMovimiento(conn,cursor,tipo):
     print(f"\n--- REGISTRAR {tipo} DE MERCANCÍA ---")
-    id_usuario = 1  # Usuario fijo por ahora
 
     # ---------------- 1) Seleccionar producto ----------------
     try:
@@ -297,16 +325,17 @@ def RegistrarMovimiento(tipo):
         print("Error: El ID del producto debe ser un número.\n")    #Hay que hacer un bucle para que no se cierre de una
         return
 
-    producto = productos.get(id_producto)
+    # Verificar si el producto existe en la DB
+    cursor.execute("SELECT id_producto FROM productos WHERE id_producto = ?", (id_producto,))
+    producto = cursor.fetchone()
 
     if producto is None:
         if tipo == "INGRESO":
             print("Producto no encontrado. ¿Desea crearlo ahora? (S/N)")
             respuesta = input("> ").strip().upper()
             if respuesta == "S":
-                id_producto = CrearProducto()
-                producto = productos.get(id_producto)
-                if producto is None:
+                id_producto = CrearProducto(conn,cursor)
+                if id_producto is None:
                     print("Error al crear producto. Operación cancelada.\n")
                     return
             else:
@@ -321,14 +350,15 @@ def RegistrarMovimiento(tipo):
         codigo = input("Ingrese el ID del lote o presione ENTER para crear uno nuevo: ").strip()
 
         if codigo == "":  # Crear nuevo lote
-            id_lote = CrearLote(id_producto)
+            id_lote = CrearLote(conn,cursor,id_producto)
             if id_lote is None:
                 print("Error al crear el lote. Operación cancelada.\n")
                 return
 
-            lote = lotes.get(id_lote)
-            cantidad = 0
-            cantidad = lote['cantidad']  # La cantidad del movimiento es la del lote recién creado
+            # Obtener la cantidad inicial del lote recién creado
+            cursor.execute("SELECT cantidad FROM lotes WHERE id_lote = ?", (id_lote,))
+            cantidad = cursor.fetchone()[0]
+
 
         else:
             try:
@@ -337,15 +367,21 @@ def RegistrarMovimiento(tipo):
                 print("Error: El ID del lote debe ser un número.\n")
                 return
 
-            lote = lotes.get(id_lote)
+            # Verificar si el lote existe
+            cursor.execute("SELECT cantidad FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
+            lote = cursor.fetchone()
             if lote is not None:
                 try:
-                    cantidad = int(input("Ingrese la cantidad a ingresar al lote (unidades): "))
+                    cantidad_ingreso = int(input("Ingrese la cantidad a ingresar al lote (unidades): "))
                 except ValueError:
                     print("Error: La cantidad debe ser un número entero.\n")
                     return
 
-                lote['cantidad'] += cantidad
+                # Actualizar stock del lote
+                nueva_cantidad = lote[0] + cantidad_ingreso
+                cursor.execute("UPDATE lotes SET cantidad = ? WHERE id_lote = ?", (nueva_cantidad, id_lote))
+                conn.commit()
+                cantidad = cantidad_ingreso
                 print("Stock del lote existente actualizado.\n")
             else:
                 print("Error: El lote no existe. Operación cancelada.\n")
@@ -358,7 +394,9 @@ def RegistrarMovimiento(tipo):
             print("Error: El ID del lote debe ser un número.\n")
             return
 
-        lote = lotes.get(id_lote)
+        # Obtener stock actual del lote
+        cursor.execute("SELECT cantidad FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
+        lote = cursor.fetchone()
         if lote is None:
             print("Error: El lote no existe. No se puede registrar el egreso.\n")
             return
@@ -369,20 +407,23 @@ def RegistrarMovimiento(tipo):
             print("Error: La cantidad debe ser un número entero.\n")
             return
 
-        if cantidad > lote['cantidad']:
-            print(f"Error: Stock insuficiente. Disponible: {lote['cantidad']}\n")
+        if cantidad > lote[0]:
+            print(f"Error: Stock insuficiente. Disponible: {lote[0]}\n")
             return
 
-        lote['cantidad'] -= cantidad
+        # Actualizar stock del lote
+        nueva_cantidad = lote[0] - cantidad
+        cursor.execute("UPDATE lotes SET cantidad = ? WHERE id_lote = ?", (nueva_cantidad, id_lote))
+        conn.commit()
         print("Stock del lote actualizado.\n")
 
     # ---------------- 3) Registrar movimiento ----------------
-    CrearMovimiento(id_lote, tipo, cantidad, id_usuario)
+    CrearMovimiento(conn, cursor, id_lote, id_producto, 1 if tipo.upper() == "INGRESO" else 0, cantidad)
 
 
 
 
-def Menu():
+def Menu(conn, cursor):
     seguir = True
     while seguir:
         print("\n--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---")
@@ -398,24 +439,22 @@ def Menu():
         opcion = input("> ")
 
         if opcion == "1":
-            RegistrarMovimiento("INGRESO")
+            RegistrarMovimiento(conn, cursor, "INGRESO")
         elif opcion == "2":
-            RegistrarMovimiento("EGRESO")
+            RegistrarMovimiento(conn, cursor,"EGRESO")
         elif opcion == "3":
-            CrearProducto()
+            CrearProducto(conn, cursor)
         elif opcion == "4":
-            CrearLote(1)  # Por ahora, se pasa un id_producto fijo
+            CrearLote(conn,cursor,1)  # Por ahora, se pasa un id_producto fijo
         elif opcion == "5":
-            CrearMovimiento(1, 1, 100, 1)  # Parámetros de ejemplo
+            CrearMovimiento(conn,cursor,1, 1, 1, 100)  # Parámetros de ejemplo
         elif opcion == "6":
-            print("\n--- LISTA DE PRODUCTOS ---")
-            ListarProductos()
+            ListarProductos(conn, cursor)
         elif opcion == "7":
-            print("\n--- LISTA DE LOTES ---")
-            ListarLotes()
+            ListarLotes(conn, cursor)
         elif opcion == "8":
             print("\n--- LISTA DE MOVIMIENTOS ---")
-            ListarMovimientos()
+            ListarMovimientos(conn, cursor)
         elif opcion == "9":
             print("Saliendo...")
             seguir = False
@@ -424,4 +463,4 @@ def Menu():
 
 
 # -------------------- EJECUCIÓN PRINCIPAL --------------------
-Menu()
+

@@ -4,6 +4,7 @@ from login import LoginManager
 from reportes import Reporte
 from actualizacion_stock import iniciar_actualizacion_stock, actualizar_stock
 from alerta_de_stock_bajo import verificar_stock
+from registroDeMovimientos import *
 import sqlite3
 import os
 
@@ -57,9 +58,8 @@ def main():
 
             match opcion:
                 case "1":
-                    modulo_en_construccion("Registrar Movimientos")
-                    input(
-                        "\nPresione Enter para ver Stock Actual (módulo en construcción)...")
+                    Menu(conn, cursor)
+                    input("\nPresione Enter para ver Stock Actual (módulo en construcción)...")
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "USO", "REGISTRAR_MOVIMIENTOS", "Ingresó al módulo Registrar Movimientos (en construcción)")
                     input("\nPresione Enter para volver al menú...")
