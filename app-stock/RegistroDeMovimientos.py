@@ -453,7 +453,6 @@ def Menu(conn, cursor):
         elif opcion == "7":
             ListarLotes(conn, cursor)
         elif opcion == "8":
-            print("\n--- LISTA DE MOVIMIENTOS ---")
             ListarMovimientos(conn, cursor)
         elif opcion == "9":
             print("Saliendo...")
