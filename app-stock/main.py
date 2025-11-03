@@ -78,8 +78,8 @@ def main():
                 # --- Fin de la modificación ---
 
                 case "4":
-                    modulo_en_construccion("Consultar Alertas de Stock Bajo")
-                    verificar_stock()
+                    clear_screen()
+                    verificar_stock(conn,cursor)
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "CONSULTA", "ALERTAS", "Consultó alertas de stock bajo (en construcción)")
                     input("\nPresione Enter para volver al menú...")
