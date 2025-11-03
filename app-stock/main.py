@@ -1,6 +1,7 @@
 from auditoria_db import AuditoriaDB
 from login import LoginManager
 from actualizacion_stock import iniciar_actualizacion_stock, actualizar_stock
+from alerta_de_stock_bajo import verificar_stock
 import sqlite3
 import os
 
@@ -74,6 +75,7 @@ def main():
 
                 case "4":
                     modulo_en_construccion("Consultar Alertas de Stock Bajo")
+                    verificar_stock()
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "CONSULTA", "ALERTAS", "Consultó alertas de stock bajo (en construcción)")
                     input("\nPresione Enter para volver al menú...")

@@ -86,6 +86,7 @@ Para cada producto en la base de datos:
 
 ```pseudo
 MODULO verificar_stock()
+    productos <--traer_productos() 
     PARA CADA producto EN productos HACER
         cantidad_actual <--- buscar_lotes(producto.id)
         (stock_bajo, stock_critico) <--- buscar_limites_stock(producto.id)
@@ -93,18 +94,23 @@ MODULO verificar_stock()
         SEGUN cantidad_actual HACER
             CASO 0:
                 tipo_alerta <--- "AGOTADO"
-                lanzar_alerta()
+                lanzar_alerta(producto,tipo_alerta)
             CASO CUANDO cantidad_actual < stock_critico:
                 tipo_alerta <--- "CRITICO"
-                lanzar_alerta()
+                lanzar_alerta(producto,tipo_alerta)
             CASO CUANDO cantidad_actual < stock_bajo:
                 tipo_alerta <--- "BAJO"
-                lanzar_alerta()
+                lanzar_alerta(producto,tipo_alerta)
         FIN SEGUN
         FIN SI
     FIN PARA
 FIN MODULO
 
+FUNCION traer_productos()
+    establecer_conexion_BD()
+    query <--- "SELECT * FROM Productos"
+    lista_productos <--- ejecutar_query(query)
+    RETORNAR lista_productos
 
 FUNCION buscar_lotes(id_producto)
     establecer_conexion_BD()
