@@ -2,7 +2,7 @@ from auditoria.auditoria_db import AuditoriaDB
 from auditoria.auditoria_ui import mostrar_consulta_auditoria
 from login import LoginManager
 from reportes import Reporte
-from actualizacion_stock import iniciar_actualizacion_stock, actualizar_stock
+from chequeo_vencimiento import programar_chequear_vencimiento
 from alerta_de_stock_bajo import verificar_stock
 from registroDeMovimientos import *
 import sqlite3
@@ -34,10 +34,10 @@ def main():
     conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "stock.db"))
     cursor = conn.cursor()
 
-    auditoria = AuditoriaDB() 
+    auditoria = AuditoriaDB()
     login_manager = LoginManager()
     usuario_actual = None
-    #iniciar_actualizacion_stock(conn, cursor)
+    programar_chequear_vencimiento(periodo=60)
 
     while True:
         if usuario_actual is None:
@@ -58,16 +58,12 @@ def main():
 
             match opcion:
                 case "1":
-                    Menu(conn, cursor)  ##abre el menu de registro de movimientos (hay que cambiar esto)
-                    input("\nPresione Enter para ver Stock Actual (módulo en construcción)...")
+                    # abre el menu de registro de movimientos (hay que cambiar esto)
+                    Menu(conn, cursor)
+                    input(
+                        "\nPresione Enter para ver Stock Actual (módulo en construcción)...")
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "USO", "REGISTRAR_MOVIMIENTOS", "Ingresó al módulo Registrar Movimientos (en construcción)")
-                    input("\nPresione Enter para volver al menú...")
-
-                case "2":
-                    actualizar_stock(conn, cursor)
-                    auditoria.registrar_auditoria(
-                        usuario_actual[0], "CONSULTA", "STOCK", "Consultó stock actual (en construcción)")
                     input("\nPresione Enter para volver al menú...")
 
                 # 2. CASE 3 ACTUALIZADO
@@ -79,7 +75,7 @@ def main():
 
                 case "4":
                     clear_screen()
-                    verificar_stock(conn,cursor)
+                    verificar_stock(conn, cursor)
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "CONSULTA", "ALERTAS", "Consultó alertas de stock bajo (en construcción)")
                     input("\nPresione Enter para volver al menú...")
@@ -91,7 +87,7 @@ def main():
                             r.generar_reporte()
                     except ConnectionError as e:
                         print(f"No se pudo iniciar el modulo de reportes: {e}")
-                        
+
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "CONSULTA", "REPORTE", "Visualizó reporte (en construcción)")
                     input("\nPresione Enter para volver al menú...")
