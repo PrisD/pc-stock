@@ -41,6 +41,17 @@ def pedir_fecha(mensaje="Ingrese una fecha (dd/mm/aaaa): ", permitir_hoy=True, f
 def CrearProducto(conn, cursor):
     print("\n--- CREAR PRODUCTO ---")
 
+    
+    # ---------------- VALIDAR NOMBRE ----------------
+    while True:
+        nombre = input("Nombre (máx 50 caracteres): ").strip()
+
+        if len(nombre) > 50:
+            print("Error: El nombre no debe exceder los 50 caracteres.\n")
+            continue
+
+        break  # nombre válida
+    
     # ---------------- VALIDAR DESCRIPCIÓN ----------------
     while True:
         descripcion = input("Descripción (máx 100 caracteres): ").strip()
@@ -77,12 +88,16 @@ def CrearProducto(conn, cursor):
             print("Error: El stock critico debe ser un número entero.\n")
             continue
 
-        stock_critico = int(stock_critico_texto)     #FALTA CONTROLAR QUE CRITICO SEA MENOR QUE BAJO
+        stock_critico = int(stock_critico_texto)
 
         if stock_critico < 0:
             print("Error: El stock critico debe ser mayor o igual a 0.\n")
             continue
 
+        if stock_critico > stock_min:
+            print("Error: El stock critico debe ser mayor o igual al stock bajo.\n")
+            continue
+        
         break  # Stock critico válido
     
     
@@ -92,9 +107,9 @@ def CrearProducto(conn, cursor):
     # ---------------- GUARDAR EN "BASE DE DATOS" ----------------
     try:
         cursor.execute("""
-            INSERT INTO productos (descripcion, stock_bajo, stock_critico)
-            VALUES (?, ?, ?)
-        """, (descripcion, stock_min, stock_critico))
+            INSERT INTO productos (nombre, descripcion, stock_bajo, stock_critico)
+            VALUES (?, ?, ?, ?)
+        """, (nombre, descripcion, stock_min, stock_critico))
         conn.commit()
 
         id_producto = cursor.lastrowid  # Recupera el ID asignado automáticamente
@@ -118,7 +133,7 @@ def ListarProductos(conn, cursor):
     print("\n--- LISTADO DE PRODUCTOS ---")
 
     try:
-        cursor.execute("SELECT id_producto, descripcion, stock_bajo, stock_critico FROM productos")
+        cursor.execute("SELECT id_producto, nombre, descripcion, stock_bajo, stock_critico FROM productos")
         productos = cursor.fetchall()
 
         if not productos:
@@ -126,14 +141,15 @@ def ListarProductos(conn, cursor):
             return
 
         # Encabezado
-        print(f"{'ID':<5} {'Descripción':<35} {'Stock Bajo':<12} {'Stock Crítico':<12}")
-        print("-" * 70)
+        print(f"{'ID':<5} {'nombre':<35} {'Descripción':<35} {'Stock Bajo':<12} {'Stock Crítico':<12}")
+        print("-" * 105)
 
         # Filas
         for prod in productos:
-            id_producto, descripcion, stock_bajo, stock_critico = prod
+            id_producto, nombre, descripcion, stock_bajo, stock_critico = prod
             descripcion_corta = cortar(descripcion, 35)
-            print(f"{id_producto:<5} {descripcion_corta:<35} {stock_bajo:<12} {stock_critico:<12}")
+            nombre_corto = cortar(nombre, 35)
+            print(f"{id_producto:<5} {nombre_corto:<35} {descripcion_corta:<35} {stock_bajo:<12} {stock_critico:<12}")
 
         print()
 
@@ -169,7 +185,7 @@ def CrearLote(conn,cursor,id_producto):
         )
 
         if fecha_vencimiento < fecha_ingreso:
-            print("❌ Error: La fecha de vencimiento no puede ser anterior a la de ingreso.")
+            print("Error: La fecha de vencimiento no puede ser anterior a la de ingreso.")
         else:
             break
 
@@ -254,7 +270,7 @@ def ListarLotes(conn, cursor):
 
 # ---------------------------  CREAR MOVIMIENTOS------------------------------------
 
-def CrearMovimiento(conn,cursor,id_lote,id_producto, tipo, cantidad):
+def CrearMovimiento(conn,cursor,id_lote,id_usuario, tipo, cantidad):
     print("\n--- REGISTRAR MOVIMIENTO ---")
 
     # 1) Obtener fecha actual directamente
@@ -268,9 +284,9 @@ def CrearMovimiento(conn,cursor,id_lote,id_producto, tipo, cantidad):
     # 2) Guardar en la base de datos
     try:
         cursor.execute("""
-            INSERT INTO movimientos (id_lote, id_producto, tipo, cantidad, fecha)
+            INSERT INTO movimientos (id_lote, id_usuario, tipo, cantidad, fecha)
             VALUES (?, ?, ?, ?, ?)
-        """, (id_lote, id_producto, tipo, cantidad, fecha.strftime("%Y-%m-%d")))
+        """, (id_lote, id_usuario, tipo, cantidad, fecha.strftime("%Y-%m-%d")))
         conn.commit()
 
         id_movimiento = cursor.lastrowid
@@ -288,7 +304,7 @@ def ListarMovimientos(conn, cursor):
     print("\n--- LISTADO DE MOVIMIENTOS ---")
     try:
         cursor.execute("""
-            SELECT id_movimiento, id_lote, id_producto, tipo, cantidad, fecha
+            SELECT id_movimiento, id_lote, id_usuario, tipo, cantidad, fecha
             FROM movimientos
             ORDER BY id_movimiento
         """)
@@ -299,13 +315,13 @@ def ListarMovimientos(conn, cursor):
             return
 
         # Encabezado
-        print(f"{'ID Mov':<10} {'ID Lote':<10} {'ID Prod':<10} {'Tipo':<6} {'Cantidad':<10} {'Fecha':<12}")
+        print(f"{'ID Mov':<10} {'ID Lote':<10} {'ID Usuario':<10} {'Tipo':<6} {'Cantidad':<10} {'Fecha':<12}")
         print("-" * 65)
 
-        for id_mov, id_lote, id_prod, tipo, cantidad, fecha in movimientos:
+        for id_mov, id_lote, id_usuario, tipo, cantidad, fecha in movimientos:
             fecha_str = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d/%m/%Y")
             tipo_str = "Ingreso" if tipo == 1 else "Egreso"
-            print(f"{id_mov:<10} {id_lote:<10} {id_prod:<10} {tipo_str:<6} {cantidad:<10} {fecha_str:<12}")
+            print(f"{id_mov:<10} {id_lote:<10} {id_usuario:<10} {tipo_str:<6} {cantidad:<10} {fecha_str:<12}")
 
         print()
 
@@ -315,7 +331,7 @@ def ListarMovimientos(conn, cursor):
 
 
 # ---------------------------REGISTRAR MOVIMIENTOS------------------------------------
-def RegistrarMovimiento(conn,cursor,tipo):
+def RegistrarMovimiento(conn,cursor,tipo,id_usuario):
     print(f"\n--- REGISTRAR {tipo} DE MERCANCÍA ---")
 
     # ---------------- 1) Seleccionar producto ----------------
@@ -418,12 +434,12 @@ def RegistrarMovimiento(conn,cursor,tipo):
         print("Stock del lote actualizado.\n")
 
     # ---------------- 3) Registrar movimiento ----------------
-    CrearMovimiento(conn, cursor, id_lote, id_producto, 1 if tipo.upper() == "INGRESO" else 0, cantidad)
+    CrearMovimiento(conn, cursor, id_lote, id_usuario, 1 if tipo.upper() == "INGRESO" else 0, cantidad)
 
 
 
 
-def Menu(conn, cursor):
+def menuRegistrarMovimiento(conn, cursor,id_usuario):#falta agregar id_usuario
     seguir = True
     while seguir:
         print("\n--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---")
@@ -439,15 +455,15 @@ def Menu(conn, cursor):
         opcion = input("> ")
 
         if opcion == "1":
-            RegistrarMovimiento(conn, cursor, "INGRESO")
+            RegistrarMovimiento(conn, cursor, "INGRESO",id_usuario)
         elif opcion == "2":
-            RegistrarMovimiento(conn, cursor,"EGRESO")
+            RegistrarMovimiento(conn, cursor,"EGRESO",id_usuario) #falta agregar id_usuario
         elif opcion == "3":
             CrearProducto(conn, cursor)
         elif opcion == "4":
             CrearLote(conn,cursor,1)  # Por ahora, se pasa un id_producto fijo
         elif opcion == "5":
-            CrearMovimiento(conn,cursor,1, 1, 1, 100)  # Parámetros de ejemplo
+            CrearMovimiento(conn,cursor,1, id_usuario, 1, 100)  # Parámetros de ejemplo
         elif opcion == "6":
             ListarProductos(conn, cursor)
         elif opcion == "7":
@@ -463,3 +479,6 @@ def Menu(conn, cursor):
 
 # -------------------- EJECUCIÓN PRINCIPAL --------------------
 
+#FALTA -  LLAMAR A ACTUALIZAR STOCK MANDANDOLE EL ID DEL MOVIMIENTO CREADO
+# SEPARAR EN DISTINTOS MODULOS, EN DIFERENTES ARCHIVOS.
+# INTEGRAR CON AUDITORIA

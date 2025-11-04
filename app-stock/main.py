@@ -58,7 +58,7 @@ def main():
 
             match opcion:
                 case "1":
-                    Menu(conn, cursor)  ##abre el menu de registro de movimientos (hay que cambiar esto)
+                    menuRegistrarMovimiento(conn, cursor,usuario_actual[0])  ##abre el menu de registro de movimientos (hay que cambiar esto)
                     input("\nPresione Enter para ver Stock Actual (módulo en construcción)...")
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "USO", "REGISTRAR_MOVIMIENTOS", "Ingresó al módulo Registrar Movimientos (en construcción)")
