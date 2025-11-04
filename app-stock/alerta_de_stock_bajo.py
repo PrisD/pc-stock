@@ -18,7 +18,7 @@ class Alerta:
 def traer_productos(conn,cursor):
     """Obtiene todos los productos de la base de datos"""
     try:
-        cursor.execute("SELECT id_producto, descripcion FROM productos")
+        cursor.execute("SELECT id_producto, nombre FROM productos")
         return [{'id': row[0], 'nombre': row[1]} for row in cursor.fetchall()]
     finally:
         conn.commit()
@@ -74,7 +74,7 @@ def guardar_alerta(alerta: Alerta,conn,cursor):
     """Guarda la alerta en la base de datos"""
     try:
         cursor.execute("""
-            INSERT INTO alertas (id_producto, fecha, cantidad, tipo_alerta, descripcion)
+            INSERT INTO alertas (id_producto, fecha, cantidad, tipo, descripcion)
             VALUES (?, ?, ?, ?, ?)
         """, (
             alerta.id_producto,
