@@ -1,4 +1,5 @@
 from datetime import datetime
+from actualizacion_stock import actualizar_stock
 import sqlite3
 
 # ------------------ "BASES DE DATOS" EN MEMORIA ------------------
@@ -281,15 +282,7 @@ def CrearMovimiento(conn, cursor, id_lote, id_usuario, tipo, cantidad):
 
     # 2) Guardar en la base de datos
     try:
-        cursor.execute("""
-            INSERT INTO movimientos (id_lote, id_usuario, tipo, cantidad, fecha)
-            VALUES (?, ?, ?, ?, ?)
-        """, (id_lote, id_usuario, tipo, cantidad, fecha.strftime("%Y-%m-%d")))
-        conn.commit()
-
-        id_movimiento = cursor.lastrowid
-        print(f"Movimiento {id_movimiento} registrado correctamente.\n")
-        return id_movimiento
+        return actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha)
 
     except Exception as e:
         print(f"Error al registrar el movimiento: {e}")
@@ -493,3 +486,6 @@ def menuRegistrarMovimiento(conn, cursor, id_usuario):  # falta agregar id_usuar
 # FALTA -  LLAMAR A ACTUALIZAR STOCK MANDANDOLE EL ID DEL MOVIMIENTO CREADO
 # SEPARAR EN DISTINTOS MODULOS, EN DIFERENTES ARCHIVOS.
 # INTEGRAR CON AUDITORIA
+#DEJAR EN EL MENU LAS OPCIONES REALES
+#QUE SE PUEDAN INGRESAR LOTES VENCIDOS
+#QUE APAREZCAN ARRIBA LOS ULTIMOS LOTES, LOS ULTIMOS MOVIMIENTOS, LOS ULTIMOS PRODUCTOS CREADOS

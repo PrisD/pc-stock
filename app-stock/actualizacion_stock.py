@@ -2,7 +2,7 @@ import sqlite3
 from utils import stockdb_path
 
 
-def actualizar_stock(id_movimiento, id_lote, id_usuario, tipo, cantidad, fecha):
+def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha):
     """
     Es llamado cada vez que se realiza un movimiento. Recibe como entrada los parámetros del movimiento.
     Crea una entrada en la tabla de movimientos y crea o modifica una entrada en la tabla de stock.
@@ -12,9 +12,9 @@ def actualizar_stock(id_movimiento, id_lote, id_usuario, tipo, cantidad, fecha):
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO movimientos (id_movimiento, id_lote, id_usuario, tipo, cantidad, fecha)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (id_movimiento, id_lote, id_usuario, tipo, cantidad, fecha))
+            INSERT INTO movimientos (id_lote, id_usuario, tipo, cantidad, fecha)
+            VALUES (?, ?, ?, ?, ?)
+        """, (id_lote, id_usuario, tipo, cantidad, fecha.strftime("%Y-%m-%d")))
 
     cursor.execute("""
         SELECT id_producto
@@ -51,3 +51,5 @@ def actualizar_stock(id_movimiento, id_lote, id_usuario, tipo, cantidad, fecha):
 
     conn.commit()
     conn.close()
+    print(f"Movimiento registrado correctamente. Stock actualizado con exito.")
+    return 
