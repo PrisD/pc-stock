@@ -23,15 +23,16 @@ def traer_productos(conn,cursor):
     finally:
         conn.commit()
 
-def buscar_lotes(id_producto: int,conn,cursor) -> int:
-    """Obtiene la suma de cantidades en lotes activos para un producto"""
+def buscar_stock(id_producto: int,conn,cursor) -> int:
+    """Obtiene la cantidad actual desde la tabla stock"""
     try:
         cursor.execute("""
-            SELECT cantidad
-            FROM lotes
-            WHERE id_producto = ? AND estado = 'activo'
+            SELECT COALESCE(cantidad, 0)
+            FROM stock
+            WHERE id_producto = ?
         """, (id_producto,))
-        return cursor.fetchone()[0]
+        resultado = cursor.fetchone()
+        return resultado[0] if resultado else 0
     finally:
         conn.commit()
 
@@ -98,7 +99,7 @@ def verificar_stock(conn,cursor):
     productos = traer_productos(conn,cursor)
     
     for producto in productos:
-        cantidad_actual = buscar_lotes(producto['id'],conn,cursor)
+        cantidad_actual = buscar_stock(producto['id'],conn,cursor)
         stock_bajo, stock_critico = buscar_limites_stock(producto['id'],conn,cursor)
 
         if cantidad_actual == 0:

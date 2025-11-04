@@ -88,7 +88,7 @@ Para cada producto en la base de datos:
 MODULO verificar_stock()
     productos <--traer_productos() 
     PARA CADA producto EN productos HACER
-        cantidad_actual <--- buscar_lotes(producto.id)
+        cantidad_actual <--- buscar_stock(producto.id)
         (stock_bajo, stock_critico) <--- buscar_limites_stock(producto.id)
 
         SEGUN cantidad_actual HACER
@@ -112,9 +112,9 @@ FUNCION traer_productos()
     lista_productos <--- ejecutar_query(query)
     RETORNAR lista_productos
 
-FUNCION buscar_lotes(id_producto)
+FUNCION buscar_stock(id_producto)
     establecer_conexion_BD()
-    query <--- "SELECT SUM(cantidad) FROM Lote WHERE id_producto = id_producto"
+    query <--- "SELECT cantidad FROM stock WHERE id_producto = id_producto"
     cantidad_actual <--- ejecutar_query(query)
     RETORNAR cantidad_actual
 FIN FUNCION
