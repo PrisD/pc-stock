@@ -2,6 +2,7 @@ import sqlite3
 import os
 import utils
 import pandas as pd
+import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
 class Reporte:
@@ -50,7 +51,7 @@ class Reporte:
 
     # TODOS LOS REPORTES EJECUTARAN LA CONSULTA Y DEVUELVEN UN DATAFRAME DE PANDAS COMO RESPUESTA
       
-    def reporte_ingresos_egresos_producto(self, fecha_inicio, fecha_fin, producto):
+    def reporte_egresos_producto(self, fecha_inicio, fecha_fin, producto):
         if not self.cursor:
             raise ConnectionError("La conexion no esta iniciada.")
         
@@ -58,7 +59,6 @@ class Reporte:
             SELECT
                 p.nombre_producto,
                 t.fecha_completa,
-                m.cantidad_ingresos,
                 m.cantidad_egresos
             FROM fact_movimientos m
             JOIN dim_productos p ON m.id_producto = p.id_producto
@@ -72,11 +72,51 @@ class Reporte:
 
         try:
             df_reporte = pd.read_sql_query(query, self.conn, params=params)
-            df_reporte['neto'] = df_reporte['cantidad_ingresos'] - df_reporte['cantidad_egresos']
+            df_reporte['fecha_completa'] = pd.to_datetime(df_reporte['fecha_completa'])
             return df_reporte
         except Exception as e:
             print(f"Error al generar reporte con pandas: {e}")
             return pd.DataFrame() # devuelvo un dataframe vacio en caso de error
+
+
+
+    def graficar_reporte_egresos(self, df_reporte):
+        if df_reporte.empty:
+            print("No hay datos para graficar.")
+            return
+        try:
+            
+            nombre_producto = df_reporte['nombre_producto'].iloc[0]
+            
+            print("Generando gráfico...")
+
+            # creacion del grafico
+            plt.figure(figsize=(15, 7))
+            
+           
+            plt.plot(
+                df_reporte['fecha_completa'], # eje X
+                df_reporte['cantidad_egresos'], # eje Y
+                marker='o',
+                linestyle='-',
+                markersize=4
+            )
+            
+            
+            plt.title(f'Evolución de Egresos (Ventas) de: {nombre_producto}')
+            plt.xlabel('Fecha')
+            plt.ylabel('Cantidad Vendida (Egresos)')
+            
+            plt.grid(True) 
+            plt.tight_layout() 
+            
+            # mostrar grafico
+            # plt.savefig('reporte_ventas.png') # descomentar si se desea guardar
+            plt.show()
+
+        except Exception as e:
+            print(f"Error al generar el gráfico: {e}")
+
 
 
 
@@ -173,7 +213,7 @@ class Reporte:
 
     def generar_reporte(self):
         print("Selecciones el tipo de reporte que desea:")
-        print("1. Reporte de ingresos y egresos por fecha dividido por producto.")
+        print("1. Reporte de egresos por fecha dividido por producto.")
         print("2. Reporte de vencimientos por fecha.")
         print("3. Reporte de evolucion de stock de un producto por periodo.")
 
@@ -224,7 +264,8 @@ class Reporte:
             case "1":
                 fecha_inicio_sql = f"{fecha_inicio} 00:00:00"
                 fecha_fin_sql = f"{fecha_fin} 23:59:59"
-                df_reporte = self.reporte_ingresos_egresos_producto(fecha_inicio_sql, fecha_fin_sql, producto)
+                df_reporte = self.reporte_egresos_producto(fecha_inicio_sql, fecha_fin_sql, producto)
+                self.graficar_reporte_egresos(df_reporte)
             
             case "2":
                 fecha_inicio_sql = f"{fecha_inicio} 00:00:00"
@@ -234,7 +275,7 @@ class Reporte:
             case "3":
                 df_reporte = self.reporte_evolucion_stock(periodo, fecha_fin, producto)
 
-        if not df_reporte.empty:
+        """if not df_reporte.empty:
             print("\n --- Vista previa de las primeras 5 filas ---")
             print(df_reporte.head())
             print("-----------------------------------------------")
@@ -244,7 +285,7 @@ class Reporte:
 
             self.exportar_reporte(df_reporte, formato, nombre_archivo)
         else:
-            print("no se generaron los datos para el reporte")
+            print("no se generaron los datos para el reporte")"""
 
 
 
