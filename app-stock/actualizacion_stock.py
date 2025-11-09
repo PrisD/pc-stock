@@ -30,6 +30,13 @@ def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha):
 
     id_producto = fila[0]
 
+    # Asegurarse de que exista una entrada en la tabla de stock para el producto
+    cursor.execute("""
+        INSERT OR IGNORE INTO stock (id_producto, cantidad)
+        VALUES (?, 0)
+    """, (id_producto,))
+    
+    
     # ingreso
     if tipo == 1:
         cursor.execute("""

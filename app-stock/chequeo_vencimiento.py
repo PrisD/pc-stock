@@ -23,7 +23,7 @@ def chequear_vencimiento():
 
     while True:
         cursor.execute("""
-            SELECT id_lote, fecha_vencimiento
+            SELECT id_lote, id_producto, cantidad, fecha_vencimiento
             FROM lotes
             WHERE estado = 'activo'
             ORDER BY fecha_vencimiento ASC
@@ -34,7 +34,7 @@ def chequear_vencimiento():
         if lote is None:
             break
 
-        id_lote, fecha_vencimiento = lote
+        id_lote, id_producto, cantidad_lote, fecha_vencimiento = lote
 
         if isinstance(fecha_vencimiento, str):
             fecha_vencimiento = date.fromisoformat(fecha_vencimiento)
@@ -45,6 +45,13 @@ def chequear_vencimiento():
                 SET estado = 'vencido'
                 WHERE id_lote = ?
             """, (id_lote,))
+            
+            cursor.execute("""
+                UPDATE stock
+                SET cantidad = cantidad - ?
+                WHERE id_producto = ?
+            """, (cantidad_lote, id_producto))
+            
             conn.commit()
         else:
             break

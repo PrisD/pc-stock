@@ -5,6 +5,7 @@ from reportes import Reporte
 from chequeo_vencimiento import programar_chequear_vencimiento
 from alerta_de_stock_bajo import verificar_stock
 from registroDeMovimientos import *
+from utils import listarStock
 import sqlite3
 import os
 
@@ -61,6 +62,12 @@ def main():
                     # abre el menu de registro de movimientos (hay que cambiar esto)
                     menuRegistrarMovimiento(conn, cursor, usuario_actual,auditoria)
                     input("\nPresione Enter para volver al menú...")
+                    
+                case "2":
+                    clear_screen()
+                    listarStock(conn, cursor)
+                    input("\nPresione Enter para volver al menú...")
+                # --- Fin de la modificación ---
 
                 # 2. CASE 3 ACTUALIZADO
                 case "3":
