@@ -5,6 +5,7 @@ from reportes import Reporte
 from chequeo_vencimiento import programar_chequear_vencimiento
 from alerta_de_stock_bajo import verificar_stock
 from registroDeMovimientos import *
+from utils import listarStock
 import sqlite3
 import os
 
@@ -65,6 +66,12 @@ def main():
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "USO", "REGISTRAR_MOVIMIENTOS", "Ingresó al módulo Registrar Movimientos (en construcción)")
                     input("\nPresione Enter para volver al menú...")
+                    
+                case "2":
+                    clear_screen()
+                    listarStock(conn, cursor)
+                    input("\nPresione Enter para volver al menú...")
+                # --- Fin de la modificación ---
 
                 # 2. CASE 3 ACTUALIZADO
                 case "3":
