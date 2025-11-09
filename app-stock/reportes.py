@@ -84,34 +84,75 @@ class Reporte:
         if df_reporte.empty:
             print("No hay datos para graficar.")
             return
+        
         try:
-            
             nombre_producto = df_reporte['nombre_producto'].iloc[0]
-            
-            print("Generando gráfico...")
+            print("Generando dashboard de gráficos...")
 
-            # creacion del grafico
-            plt.figure(figsize=(15, 7))
+            df_reporte = df_reporte.set_index('fecha_completa')
+
+            df_diario = df_reporte['cantidad_egresos'].resample('D').sum()
+            df_semanal = df_reporte['cantidad_egresos'].resample('W').sum()
+            df_mensual = df_reporte['cantidad_egresos'].resample('M').sum()
+            df_trimestral = df_reporte['cantidad_egresos'].resample('Q').sum()
+            df_anual = df_reporte['cantidad_egresos'].resample('Y').sum()
             
-           
-            plt.plot(
-                df_reporte['fecha_completa'], # eje X
-                df_reporte['cantidad_egresos'], # eje Y
-                marker='o',
-                linestyle='-',
-                markersize=4
-            )
-            
-            
-            plt.title(f'Evolución de Egresos (Ventas) de: {nombre_producto}')
-            plt.xlabel('Fecha')
-            plt.ylabel('Cantidad Vendida (Egresos)')
-            
-            plt.grid(True) 
-            plt.tight_layout() 
-            
-            # mostrar grafico
-            # plt.savefig('reporte_ventas.png') # descomentar si se desea guardar
+            fig, axs = plt.subplots(3, 2, figsize=(18, 15)) 
+            fig.suptitle(f'Dashboard de Egresos (Ventas) de: {nombre_producto}', fontsize=20)
+
+            ax = axs[0, 0]
+            if df_diario.shape[0] > 1:
+                ax.plot(df_diario.index, df_diario.values, marker='.', linestyle='-', markersize=2)
+                ax.set_title('Evolución Diaria')
+                ax.set_ylabel('Cantidad Vendida')
+                ax.grid(True)
+            else:
+                ax.axis('off')
+
+            ax = axs[0, 1]
+            if df_semanal.shape[0] > 1:
+                ax.plot(df_semanal.index, df_semanal.values, marker='o', linestyle='-', markersize=4, color='teal')
+                ax.set_title('Total Semanal')
+                ax.grid(True)
+            else:
+                ax.axis('off')
+
+            ax = axs[1, 0]
+            if df_mensual.shape[0] > 1:
+                ax.plot(df_mensual.index, df_mensual.values, marker='o', linestyle='-', markersize=5, color='cornflowerblue')
+                ax.set_title('Total Mensual')
+                ax.set_ylabel('Cantidad Vendida')
+                ax.grid(True)
+            else:
+                ax.axis('off')
+
+            ax = axs[1, 1]
+            if df_trimestral.shape[0] > 1:
+                ax.plot(df_trimestral.index, df_trimestral.values, marker='o', linestyle='-', markersize=5, color='mediumseagreen')
+                ax.set_title('Total Trimestral')
+                ax.grid(True)
+            else:
+                ax.axis('off')
+
+            ax = axs[2, 0]
+            if df_anual.shape[0] > 1:
+                etiquetas_anuales = df_anual.index.strftime('%Y')
+                ax.bar(
+                    etiquetas_anuales, 
+                    df_anual.values, 
+                    color='salmon', 
+                    width=0.8
+                )
+                ax.set_title('Total Anual')
+                ax.set_ylabel('Cantidad Vendida')
+                ax.grid(True)
+            else:
+                ax.axis('off')
+
+            axs[2, 1].axis('off')
+
+            plt.subplots_adjust(hspace=0.04, wspace=0.1)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95], h_pad=3.0, w_pad=2.0)
             plt.show()
 
         except Exception as e:
@@ -265,6 +306,7 @@ class Reporte:
                 fecha_inicio_sql = f"{fecha_inicio} 00:00:00"
                 fecha_fin_sql = f"{fecha_fin} 23:59:59"
                 df_reporte = self.reporte_egresos_producto(fecha_inicio_sql, fecha_fin_sql, producto)
+                #periodo = input("En que tipo de periodo desea el reporte 1=anio, 2=trimestre, 3=mes, 4=semana, 5=dia")
                 self.graficar_reporte_egresos(df_reporte)
             
             case "2":
