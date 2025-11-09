@@ -440,7 +440,8 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario):
                     1 if tipo.upper() == "INGRESO" else 0, cantidad)
 
 
-def menuRegistrarMovimiento(conn, cursor, id_usuario):  # falta agregar id_usuario
+def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agregar id_usuario
+    auditoria.registrar_auditoria(id_usuario[0], "INGRESO","MOVIMIENTOS",f"Usuario {id_usuario[1]} ingresó al módulo")
     seguir = True
     while seguir:
         print("\n--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---")
@@ -456,17 +457,17 @@ def menuRegistrarMovimiento(conn, cursor, id_usuario):  # falta agregar id_usuar
         opcion = input("> ")
 
         if opcion == "1":
-            RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario)
+            RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario[0])
         elif opcion == "2":
             # falta agregar id_usuario
-            RegistrarMovimiento(conn, cursor, "EGRESO", id_usuario)
+            RegistrarMovimiento(conn, cursor, "EGRESO", id_usuario[0])
         elif opcion == "3":
             CrearProducto(conn, cursor)
         elif opcion == "4":
             # Por ahora, se pasa un id_producto fijo
             CrearLote(conn, cursor, 1)
         elif opcion == "5":
-            CrearMovimiento(conn, cursor, 1, id_usuario, 1,
+            CrearMovimiento(conn, cursor, 1, id_usuario[0], 1,
                             100)  # Parámetros de ejemplo
         elif opcion == "6":
             ListarProductos(conn, cursor)

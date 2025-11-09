@@ -59,37 +59,27 @@ def main():
             match opcion:
                 case "1":
                     # abre el menu de registro de movimientos (hay que cambiar esto)
-                    menuRegistrarMovimiento(conn, cursor, usuario_actual[0])
-                    input(
-                        "\nPresione Enter para ver Stock Actual (módulo en construcción)...")
-                    auditoria.registrar_auditoria(
-                        usuario_actual[0], "USO", "REGISTRAR_MOVIMIENTOS", "Ingresó al módulo Registrar Movimientos (en construcción)")
+                    menuRegistrarMovimiento(conn, cursor, usuario_actual,auditoria)
                     input("\nPresione Enter para volver al menú...")
 
                 # 2. CASE 3 ACTUALIZADO
                 case "3":
                     clear_screen()
-                    mostrar_consulta_auditoria(auditoria, usuario_actual[0])
+                    mostrar_consulta_auditoria(auditoria, usuario_actual)
                     input("\nPresione Enter para volver al menú...")
-                # --- Fin de la modificación ---
 
                 case "4":
                     clear_screen()
-                    verificar_stock(conn, cursor)
-                    auditoria.registrar_auditoria(
-                        usuario_actual[0], "CONSULTA", "ALERTAS", "Consultó alertas de stock bajo (en construcción)")
+                    verificar_stock(conn, cursor,usuario_actual,auditoria)
                     input("\nPresione Enter para volver al menú...")
 
                 case "5":
                     handler_de_reportes = Reporte('dw.db')
                     try:
                         with handler_de_reportes as r:
-                            r.generar_reporte()
+                            r.generar_reporte(usuario_actual, auditoria)
                     except ConnectionError as e:
                         print(f"No se pudo iniciar el modulo de reportes: {e}")
-
-                    auditoria.registrar_auditoria(
-                        usuario_actual[0], "CONSULTA", "REPORTE", "Visualizó reporte (en construcción)")
                     input("\nPresione Enter para volver al menú...")
 
                 case "6":

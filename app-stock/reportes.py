@@ -171,7 +171,8 @@ class Reporte:
             print(f"Error al exportar: {e}")
 
 
-    def generar_reporte(self):
+    def generar_reporte(self, id_usuario, auditoria):
+        auditoria.registrar_auditoria(id_usuario[0], "INGRESO","REPORTES",f"Usuario {id_usuario[1]} ingresó al módulo")
         print("Selecciones el tipo de reporte que desea:")
         print("1. Reporte de ingresos y egresos por fecha dividido por producto.")
         print("2. Reporte de vencimientos por fecha.")

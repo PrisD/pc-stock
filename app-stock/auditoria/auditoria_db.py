@@ -86,7 +86,7 @@ class AuditoriaDB:
             filtros.append("a.accion = ?")
             parametros.append(accion)
             
-        query_completa = query_base + " WHERE " + " AND ".join(filtros) + " ORDER BY a.fecha_hora DESC"
+        query_completa = query_base + " WHERE " + " AND ".join(filtros) + " ORDER BY a.fecha_hora ASC"
 
         self.cursor.execute(query_completa, parametros)
         return self.cursor.fetchall()

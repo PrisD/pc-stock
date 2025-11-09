@@ -107,6 +107,12 @@ def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
     dia_filtro, nombre_dia_filtro = _seleccionar_dia(db, anio, mes)
     id_usuario_filtro, nombre_usuario_filtro = _seleccionar_usuario(db)
     accion_filtro, nombre_accion_filtro = _seleccionar_accion(db)
+    
+    try:
+        detalle_log = f"Consultó registros de {mes}/{anio}. Filtros: Día='{nombre_dia_filtro}', Usuario='{nombre_usuario_filtro}', Acción='{nombre_accion_filtro}'"
+        db.registrar_auditoria(id_usuario_actual[0], "CONSULTA", "AUDITORIA", detalle_log)
+    except Exception:
+        pass
 
     # --- 3. OBTENER DATOS FILTRADOS  ---
     filas = db.obtener_auditorias_filtradas(
@@ -136,10 +142,4 @@ def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
     for registro in filas:
         fecha, nombre, accion, modulo, detalle = registro
         print(f"{fecha} | {nombre:10} | {accion:10} | {modulo:10} | {detalle or ''}")
-
-    # --- 5. REGISTRAR LA CONSULTA ---
-    try:
-        detalle_log = f"Consultó registros de {mes}/{anio}. Filtros: Día='{nombre_dia_filtro}', Usuario='{nombre_usuario_filtro}', Acción='{nombre_accion_filtro}'"
-        db.registrar_auditoria(id_usuario_actual, "CONSULTA", "AUDITORIA", detalle_log)
-    except Exception:
-        pass
+    

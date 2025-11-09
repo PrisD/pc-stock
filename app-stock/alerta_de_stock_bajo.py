@@ -94,7 +94,8 @@ def lanzar_alerta(producto: dict, tipo_alerta: str, cantidad_actual: int,stock_b
     mostrar_alerta(alerta,cantidad_actual,producto)
     guardar_alerta(alerta,conn,cursor)
 
-def verificar_stock(conn,cursor):
+def verificar_stock(conn,cursor,id_usuario,auditoria):
+    auditoria.registrar_auditoria(id_usuario[0], "INGRESO","ALERTAS",f"Usuario {id_usuario[1]} ingresó al módulo")
     """Verifica el stock de todos los productos y genera alertas según corresponda"""
     productos = traer_productos(conn,cursor)
     
