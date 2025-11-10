@@ -2,7 +2,7 @@ from auditoria.auditoria_db import AuditoriaDB
 from auditoria.auditoria_ui import mostrar_consulta_auditoria
 from login import LoginManager
 from reportes import Reporte
-from chequeo_vencimiento import programar_chequear_vencimiento
+from chequeo_vencimiento import programar_chequear_vencimiento, chequear_vencimiento
 from alerta_de_stock_bajo import verificar_stock
 from registroDeMovimientos import *
 from utils import listarStock
@@ -22,6 +22,7 @@ def mostrar_menu():
     print("4. Consultar Alertas de Stock Bajo")
     print("5. Visualizar Reporte")
     print("6. Cerrar Sesión")
+    print("8. Chequear vencimiento")
     print("Seleccione una opción: ", end="")
 
 
@@ -61,10 +62,11 @@ def main():
                 case "1":
                     # abre el menu de registro de movimientos (hay que cambiar esto)
                     clear_screen()
-                    menuRegistrarMovimiento(conn, cursor, usuario_actual,auditoria)
-                    verificar_stock(conn, cursor,usuario_actual,auditoria)
+                    menuRegistrarMovimiento(
+                        conn, cursor, usuario_actual, auditoria)
+                    verificar_stock(conn, cursor, usuario_actual, auditoria)
                     input("\nPresione Enter para volver al menú...")
-                    
+
                 case "2":
                     clear_screen()
                     listarStock(conn, cursor)
@@ -79,7 +81,7 @@ def main():
 
                 case "4":
                     clear_screen()
-                    verificar_stock(conn, cursor,usuario_actual,auditoria)
+                    verificar_stock(conn, cursor, usuario_actual, auditoria)
                     input("\nPresione Enter para volver al menú...")
 
                 case "5":
@@ -97,6 +99,11 @@ def main():
                     usuario_actual = None
                     print("\nSesión cerrada.")
                     input("Presione Enter para continuar...")
+
+                case "8":
+                    clear_screen()
+                    chequear_vencimiento()
+                    input("\nPresione Enter para volver al menú...")
 
                 case _:
                     print("\nOpción no válida. Por favor, intente de nuevo.")
