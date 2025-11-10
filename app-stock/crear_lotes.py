@@ -3,7 +3,7 @@ from utils import pedir_fecha
 import sqlite3
 
 
-def CrearLote(conn, cursor, id_producto):
+def CrearLote(conn, cursor, id_producto, usuario, auditoria):
     print("\n--- CREAR LOTE ---")
 
     # ---------------- INGRESAR Y VALIDAR FECHAS ----------------
@@ -51,6 +51,8 @@ def CrearLote(conn, cursor, id_producto):
         """, (id_producto, fecha_ingreso.strftime("%Y-%m-%d"), cantidad, "activo", fecha_vencimiento.strftime("%Y-%m-%d")))
         conn.commit()
 
+        auditoria.registrar_auditoria(usuario[0], "CREAR_LOTE", "LOTES", f"Usuario {usuario[1]} creó el lote para el producto ID: {id_producto}, Cantidad: {cantidad}, Fecha Ingreso: {fecha_ingreso.strftime('%d/%m/%Y')}, Fecha Vencimiento: {fecha_vencimiento.strftime('%d/%m/%Y')}")
+
         id_lote = cursor.lastrowid
         print(
             f"\n Lote '{id_lote}' creado correctamente para el producto {id_producto}.\n")
@@ -59,6 +61,7 @@ def CrearLote(conn, cursor, id_producto):
     except Exception as e:
         print(f" Error al crear el lote: {e}\n")
         conn.rollback()
+        auditoria.registrar_auditoria(usuario[0], "ERROR_CREAR_LOTE", "LOTES", f"Usuario {usuario[1]} intentó crear un lote para el producto ID: {id_producto}. Error: {e}")
         return None
 
     # ---------------- LISTAR LOTES----------------

@@ -33,6 +33,13 @@ class AuditoriaDB:
         return datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")).strftime("%Y-%m-%d %H:%M:%S")
     
     def registrar_auditoria(self, id_usuario, accion, modulo, detalle=None):
+        '''Registra una entrada en la tabla de auditorías.  
+        Parámetros:
+            id_usuario: ID del usuario que realiza la acción.
+            accion: Descripción de la acción realizada.
+            modulo: Módulo donde se realizó la acción.
+            detalle: Información adicional sobre la acción (opcional).
+        '''
         fecha_hora = self._get_current_timestamp()
         try:
             self.cursor.execute('''

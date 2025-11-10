@@ -2,7 +2,7 @@ from datetime import datetime
 from actualizacion_stock import actualizar_stock
 import sqlite3
 
-def CrearProducto(conn, cursor):
+def CrearProducto(conn, cursor, usuario, auditoria):
     print("\n--- CREAR PRODUCTO ---")
 
     # ---------------- VALIDAR NOMBRE ----------------
@@ -73,6 +73,7 @@ def CrearProducto(conn, cursor):
 
         print(
             f"\n Producto '{nombre}' creado correctamente con ID {id_producto}.\n")
+        auditoria.registrar_auditoria(usuario[0], "CREAR_PRODUCTO", "PRODUCTOS", f"Usuario {usuario[1]} creó el producto ID: {id_producto}, Nombre: {nombre} , Descripción: {descripcion}, Stock Bajo: {stock_min}, Stock Crítico: {stock_critico}")
         return id_producto
 
     except sqlite3.Error as e:

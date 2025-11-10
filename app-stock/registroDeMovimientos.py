@@ -8,7 +8,7 @@ import sqlite3
 
 # ---------------------------  CREAR MOVIMIENTOS------------------------------------
 
-def CrearMovimiento(conn, cursor, id_lote, id_usuario, tipo, cantidad):
+def CrearMovimiento(conn, cursor, id_lote, id_usuario, tipo, cantidad, auditoria):
     print("\n--- REGISTRAR MOVIMIENTO ---")
 
     # 1) Obtener fecha actual directamente
@@ -21,14 +21,14 @@ def CrearMovimiento(conn, cursor, id_lote, id_usuario, tipo, cantidad):
 
     # 2) Guardar en la base de datos
     try:
-        return actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha)
+        return actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria)
 
     except Exception as e:
         print(f"Error al registrar el movimiento: {e}")
         conn.rollback()
         return None
 
-    # ---------------- LISTAR MOVIMIENTOS ---------------
+# ---------------- LISTAR MOVIMIENTOS ---------------
 
 
 def ListarMovimientos(conn, cursor):
@@ -63,7 +63,7 @@ def ListarMovimientos(conn, cursor):
 
 
 # ---------------------------REGISTRAR MOVIMIENTOS------------------------------------
-def RegistrarMovimiento(conn, cursor, tipo, id_usuario):
+def RegistrarMovimiento(conn, cursor, tipo, id_usuario, auditoria):
     print(f"\n--- REGISTRAR {tipo} DE MERCANCÍA ---")
 
     # ---------------- 1) Seleccionar producto ----------------
@@ -84,7 +84,7 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario):
             print("Producto no encontrado. ¿Desea crearlo ahora? (S/N)")
             respuesta = input("> ").strip().upper()
             if respuesta == "S":
-                id_producto = CrearProducto(conn, cursor)
+                id_producto = CrearProducto(conn, cursor, id_usuario, auditoria)
                 if id_producto is None:
                     print("Error al crear producto. Operación cancelada.\n")
                     return
@@ -101,7 +101,7 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario):
             "Ingrese el ID del lote o presione ENTER para crear uno nuevo: ").strip()
 
         if codigo == "":  # Crear nuevo lote
-            id_lote = CrearLote(conn, cursor, id_producto)
+            id_lote = CrearLote(conn, cursor, id_producto, id_usuario, auditoria)
             if id_lote is None:
                 print("Error al crear el lote. Operación cancelada.\n")
                 return
@@ -135,6 +135,7 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario):
                 cursor.execute(
                     "UPDATE lotes SET cantidad = ? WHERE id_lote = ?", (nueva_cantidad, id_lote))
                 conn.commit()
+                auditoria.registrar_auditoria(id_usuario[0], "INGRESO_LOTE_EXISTENTE", "LOTES", f"Usuario {id_usuario[1]} ingresó {cantidad_ingreso} unidades al lote ID: {id_lote} del producto ID: {id_producto}")
                 cantidad = cantidad_ingreso
                 print("Stock del lote existente actualizado.\n")
             else:
@@ -176,11 +177,12 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario):
         cursor.execute(
             "UPDATE lotes SET cantidad = ? WHERE id_lote = ?", (nueva_cantidad, id_lote))
         conn.commit()
+        auditoria.registrar_auditoria(id_usuario[0], "EGRESO_LOTE", "LOTES", f"Usuario {id_usuario[1]} retiró {cantidad} unidades del lote ID: {id_lote} del producto ID: {id_producto}")
         print("Stock del lote actualizado.\n")
 
     # ---------------- 3) Registrar movimiento ----------------
     CrearMovimiento(conn, cursor, id_lote, id_usuario,
-                    1 if tipo.upper() == "INGRESO" else 0, cantidad)
+                    1 if tipo.upper() == "INGRESO" else 0, cantidad, auditoria)
 
 
 def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agregar id_usuario
@@ -198,12 +200,12 @@ def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agrega
         opcion = input("> ")
 
         if opcion == "1":
-            RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario[0])
+            RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario, auditoria)
         elif opcion == "2":
             # falta agregar id_usuario
-            RegistrarMovimiento(conn, cursor, "EGRESO", id_usuario[0])
+            RegistrarMovimiento(conn, cursor, "EGRESO", id_usuario, auditoria)
         elif opcion == "3":
-            CrearProducto(conn, cursor)
+            CrearProducto(conn, cursor, id_usuario, auditoria)
         elif opcion == "4":
             ListarProductos(conn, cursor)
         elif opcion == "5":
