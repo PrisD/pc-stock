@@ -232,68 +232,35 @@ class Reporte:
             print(f"Error al generar reporte con pandas: {e}")
             return pd.DataFrame()
 
-        
-
-    def exportar_reporte(self, df, formato , nombre_archivo="reporte"):
-        if df.empty:
-            print("no hay datos para expotar")
-            return
-        
-        try:
-            match formato.lower():
-                case "csv":
-                    nombre = f"{nombre_archivo}.csv"
-                    df.to_csv(nombre, index=False)
-                    print(f"reporte {nombre} exportado exitosamente")
-                
-                case _:
-                    print(f"Formato {formato} no soportado")
-        except Exception as e:
-            print(f"Error al exportar: {e}")
 
 
     def generar_reporte(self):
         print("Selecciones el tipo de reporte que desea:")
         print("1. Reporte de egresos por fecha dividido por producto.")
-        print("2. Reporte de vencimientos por fecha.")
-        print("3. Reporte de evolucion de stock de un producto por periodo.")
 
         eleccion = input("Ingrese el numero del tipo de reporte que desea: ")
 
         match eleccion:
             case "1":
-                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ") # FALTA REPETIR MIENTRAS FALLE
-                utils.validar_fecha(fecha_inicio)
-                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ") # FALTA REPETIR MIENTRAS FALLE
-                utils.validar_fecha(fecha_fin)
-                utils.validar_rango_fechas(fecha_inicio, fecha_fin)
-                producto = input("ingrese el producto: ") # FALTA REPETIR MIENTRAS FALLE
+                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ") # INGRESO DE LA FECHA DE INICIO
+                while not utils.validar_fecha_dw(fecha_inicio):
+                    print("Formato de fecha incorrecto. Reintentar")
+                    fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ")
+
+                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ") # INGRESO DE LA FECHA DE FIN
+                while not utils.validar_fecha_dw(fecha_fin):
+                    print("Formato de fecha invalido. Reintentar")
+                    fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
+
+                if not utils.validar_rango_fechas_dw(fecha_inicio, fecha_fin): # CHEQUEO RANGO DE FECHAS VALIDO
+                    print("El rango de fechas es invalido. Recuerde que la fecha de inicio debe ser anterior o igual a la de fin.")
+                    return # detengo la generacio del reporte
                 
+
+                producto = input("ingrese el producto: ") # INGRESO DEL ID DEL PRODUCTO
                 if not self.validar_producto_dw(producto):
                     print(f"Error al validar {producto} en el data warehouse.")
                     return # detengo la generacion del reporte
-            
-            case "2":
-                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ")
-                utils.validar_fecha(fecha_inicio)
-                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
-                utils.validar_fecha(fecha_fin)
-                utils.validar_rango_fechas(fecha_inicio, fecha_fin)
-
-            case "3":
-                print("Determine el periodo que desea visualizar")
-                print("1. Semana")
-                print("2. Mes")
-                print("3. Trimestre")
-                print("4. Año")
-                periodo = input("ingrese periodo: ") # FALTA REPETIR MIENTRAS FALLE
-                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
-                utils.validar_fecha(fecha_fin) # FALTA REPETIR MIENTRAS FALLE
-                producto = input("ingrese el producto: ") # FALTA REPETIR MIENTRAS FALLE
-
-                if not self.validar_producto_dw(producto):
-                    print(f"Error al validar {producto} en el data warehouse.")
-                    return 
             
             case _:
                 print("Opcion no valida")
@@ -309,25 +276,6 @@ class Reporte:
                 #periodo = input("En que tipo de periodo desea el reporte 1=anio, 2=trimestre, 3=mes, 4=semana, 5=dia")
                 self.graficar_reporte_egresos(df_reporte)
             
-            case "2":
-                fecha_inicio_sql = f"{fecha_inicio} 00:00:00"
-                fecha_fin_sql = f"{fecha_fin} 23:59:59"
-                df_reporte = self.reporte_vencimientos(fecha_inicio_sql, fecha_fin_sql)
             
             case "3":
                 df_reporte = self.reporte_evolucion_stock(periodo, fecha_fin, producto)
-
-        """if not df_reporte.empty:
-            print("\n --- Vista previa de las primeras 5 filas ---")
-            print(df_reporte.head())
-            print("-----------------------------------------------")
-
-            formato = input("En que formato desea exportar? solo csv por ahora: ")
-            nombre_archivo = input("ingrese el nombre para el archivo (sin extension): ")
-
-            self.exportar_reporte(df_reporte, formato, nombre_archivo)
-        else:
-            print("no se generaron los datos para el reporte")"""
-
-
-
