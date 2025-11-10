@@ -1,4 +1,5 @@
 from datetime import datetime
+import textwrap
 from .auditoria_db import AuditoriaDB
 
 def _obtener_nombre_mes(numero_mes):
@@ -96,25 +97,24 @@ def _seleccionar_accion(db: AuditoriaDB):
         except ValueError:
             print("Entrada inválida. Ingrese un número.")
 
-def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
+def mostrar_consulta_auditoria(db: AuditoriaDB, usuario_actual: tuple):
     print("=== CONSULTA DE AUDITORÍAS ===")
     
-    # --- 1. SELECCIONAR PERÍODO (Obligatorio) ---
     anio, mes = _seleccionar_periodo(db)
     if anio is None:
-        return # No hay registros para mostrar
-    # --- 2. SELECCIONAR FILTROS OPCIONALES ---
+        return 
+    
     dia_filtro, nombre_dia_filtro = _seleccionar_dia(db, anio, mes)
     id_usuario_filtro, nombre_usuario_filtro = _seleccionar_usuario(db)
     accion_filtro, nombre_accion_filtro = _seleccionar_accion(db)
     
     try:
         detalle_log = f"Consultó registros de {mes}/{anio}. Filtros: Día='{nombre_dia_filtro}', Usuario='{nombre_usuario_filtro}', Acción='{nombre_accion_filtro}'"
-        db.registrar_auditoria(id_usuario_actual[0], "CONSULTA", "AUDITORIA", detalle_log)
-    except Exception:
+        db.registrar_auditoria(usuario_actual[0], "CONSULTA", "AUDITORIA", detalle_log)
+    except Exception as e:
+        print(f"Advertencia: No se pudo registrar la auditoría de la consulta: {e}")
         pass
 
-    # --- 3. OBTENER DATOS FILTRADOS  ---
     filas = db.obtener_auditorias_filtradas(
         anio=anio, 
         mes=mes, 
@@ -123,23 +123,56 @@ def mostrar_consulta_auditoria(db: AuditoriaDB, id_usuario_actual: int):
         accion=accion_filtro
     )
     
-    # --- 4. MOSTRAR RESULTADOS ---
     nombre_mes_seleccionado = _obtener_nombre_mes(mes)
     print(f"\n=== REGISTROS DE AUDITORÍA ===")
     print(f"Período: {nombre_mes_seleccionado} {anio}")
-    print(f"Día:     {nombre_dia_filtro}") # <-- Línea nueva
+    print(f"Día:     {nombre_dia_filtro}")  
     print(f"Usuario: {nombre_usuario_filtro}")
-    print(f"Acción:  {nombre_accion_filtro}")
+    print(f"Acción:  {nombre_accion_filtro}") 
     print("=" * 30)
     
     if not filas:
         print("\nNo se encontraron registros para los filtros seleccionados.\n")
         return
 
-    print("\nFecha/Hora | Usuario | Acción | Módulo | Detalle")
-    print("-" * 100)
+
+    ANCHO_FECHA = 19   
+    ANCHO_USUARIO = 8 
+    ANCHO_ACCION = 25  
+    ANCHO_MODULO = 20  
+    ANCHO_DETALLE = 100
+
+    header = (
+        f"{'Fecha/Hora'.ljust(ANCHO_FECHA)} | "
+        f"{'Usuario'.ljust(ANCHO_USUARIO)} | "
+        f"{'Acción'.ljust(ANCHO_ACCION)} | "
+        f"{'Módulo'.ljust(ANCHO_MODULO)} | "
+        f"{'Detalle'.ljust(ANCHO_DETALLE)}"
+    )
+    
+    print(f"\n{header}")
+    
+    total_width = ANCHO_FECHA + ANCHO_USUARIO + ANCHO_ACCION + ANCHO_MODULO + ANCHO_DETALLE + (4 * 3)
+    print("-" * total_width)
+    padding_ancho = ANCHO_FECHA + 3 + ANCHO_USUARIO + 3 + ANCHO_ACCION + 3 + ANCHO_MODULO + 3
+    detalle_padding = " " * padding_ancho
 
     for registro in filas:
         fecha, nombre, accion, modulo, detalle = registro
-        print(f"{fecha} | {nombre:10} | {accion:10} | {modulo:10} | {detalle or ''}")
+        
+        detalle_str = detalle or ""
+        
+        fecha_str = (fecha or '')[:ANCHO_FECHA].ljust(ANCHO_FECHA)
+        nombre_str = (nombre or '')[:ANCHO_USUARIO].ljust(ANCHO_USUARIO)
+        accion_str = (accion or '')[:ANCHO_ACCION].ljust(ANCHO_ACCION)
+        modulo_str = (modulo or '')[:ANCHO_MODULO].ljust(ANCHO_MODULO)
+        lineas_detalle = textwrap.wrap(detalle_str, width=ANCHO_DETALLE)
+        
+        if not lineas_detalle:
+            lineas_detalle = [""]
+        
+        print(f"{fecha_str} | {nombre_str} | {accion_str} | {modulo_str} | {lineas_detalle[0].ljust(ANCHO_DETALLE)}")
+        
+        for linea in lineas_detalle[1:]:
+            print(f"{detalle_padding}{linea.ljust(ANCHO_DETALLE)}")
     
