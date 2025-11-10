@@ -61,6 +61,7 @@ def main():
                 case "1":
                     # abre el menu de registro de movimientos (hay que cambiar esto)
                     menuRegistrarMovimiento(conn, cursor, usuario_actual,auditoria)
+                    verificar_stock(conn, cursor,usuario_actual,auditoria)
                     input("\nPresione Enter para volver al menú...")
                     
                 case "2":
