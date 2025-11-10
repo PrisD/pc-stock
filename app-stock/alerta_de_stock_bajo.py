@@ -71,7 +71,7 @@ def mostrar_alerta(alerta: Alerta,cantidad_actual,producto):
     print(f"Mensaje: {alerta.descripcion}")
     print("=" * 25)
 
-def guardar_alerta(alerta: Alerta,conn,cursor):
+def guardar_alerta(alerta: Alerta,conn,cursor,id_usuario,auditoria):
     """Guarda la alerta en la base de datos"""
     try:
         cursor.execute("""
@@ -86,16 +86,17 @@ def guardar_alerta(alerta: Alerta,conn,cursor):
         ))
     finally:
         conn.commit()
+        auditoria.registrar_auditoria(id_usuario[0], "CREAR_ALERTAS", "ALERTAS", f"Usuario {id_usuario[1]} creó una alerta de tipo {alerta.tipo_alerta} para el producto ID: {alerta.id_producto}, Cantidad: {alerta.cantidad}, Fecha: {alerta.fecha}")
 
-def lanzar_alerta(producto: dict, tipo_alerta: str, cantidad_actual: int,stock_bajo,conn,cursor):
+def lanzar_alerta(producto: dict, tipo_alerta: str, cantidad_actual: int,stock_bajo,conn,cursor,id_usuario,auditoria):
     """Proceso completo de crear, mostrar y guardar una alerta"""
     cant_faltante = stock_bajo - cantidad_actual
     alerta = crear_alerta(producto, cantidad_actual,cant_faltante, tipo_alerta)
     mostrar_alerta(alerta,cantidad_actual,producto)
-    guardar_alerta(alerta,conn,cursor)
+    guardar_alerta(alerta,conn,cursor,id_usuario,auditoria)
 
 def verificar_stock(conn,cursor,id_usuario,auditoria):
-    auditoria.registrar_auditoria(id_usuario[0], "INGRESO","ALERTAS",f"Usuario {id_usuario[1]} ingresó al módulo")
+    auditoria.registrar_auditoria(id_usuario[0], "INGRESO","ALERTAS",f"Usuario {id_usuario[1]} consultó las alertas")
     """Verifica el stock de todos los productos y genera alertas según corresponda"""
     productos = traer_productos(conn,cursor)
     
@@ -104,11 +105,11 @@ def verificar_stock(conn,cursor,id_usuario,auditoria):
         stock_bajo, stock_critico = buscar_limites_stock(producto['id'],conn,cursor)
 
         if cantidad_actual == 0:
-            lanzar_alerta(producto, "AGOTADO", cantidad_actual,stock_bajo,conn,cursor)
+            lanzar_alerta(producto, "AGOTADO", cantidad_actual,stock_bajo,conn,cursor,id_usuario,auditoria)
         elif cantidad_actual < stock_critico:
-            lanzar_alerta(producto, "CRITICO", cantidad_actual,stock_bajo,conn,cursor)
+            lanzar_alerta(producto, "CRITICO", cantidad_actual,stock_bajo,conn,cursor,id_usuario,auditoria)
         elif cantidad_actual < stock_bajo:
-            lanzar_alerta(producto, "BAJO", cantidad_actual,stock_bajo,conn,cursor)
+            lanzar_alerta(producto, "BAJO", cantidad_actual,stock_bajo,conn,cursor,id_usuario,auditoria)
 
 
        
