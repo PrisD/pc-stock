@@ -12,7 +12,11 @@ def CrearProducto(conn, cursor, usuario, auditoria):
         if len(nombre) > 50:
             print("Error: El nombre no debe exceder los 50 caracteres.\n")
             continue
-
+        
+        if len(nombre) < 1:
+            print("Error: El nombre no puede ser nulo.\n")
+            continue
+        
         break  # nombre válida
 
     # ---------------- VALIDAR DESCRIPCIÓN ----------------
@@ -56,7 +60,7 @@ def CrearProducto(conn, cursor, usuario, auditoria):
             continue
 
         if stock_critico > stock_min:
-            print("Error: El stock critico debe ser mayor o igual al stock bajo.\n")
+            print("Error: El stock critico debe ser menor o igual al stock bajo.\n")
             continue
 
         break  # Stock critico válido
