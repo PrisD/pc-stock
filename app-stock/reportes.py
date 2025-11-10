@@ -160,83 +160,6 @@ class Reporte:
             print(f"Error al generar el gráfico: {e}")
 
 
-
-
-    def reporte_vencimientos(self, fecha_inicio, fecha_fin, id_usuario, auditoria):
-        if not self.cursor:
-            raise ConnectionError("La conexion no esta iniciada.")
-        
-        query = """
-            SELECT
-                p.nombre_producto,
-                SUM(m.cantidad_vencidos) AS total_vencidos
-            FROM fact_movimientos m
-            JOIN dim_productos p ON m.id_producto = p.id_producto
-            JOIN dim_tiempo t ON m.id_fecha = t.id_fecha
-            WHERE
-                t.fecha_completa BETWEEN ? AND ?
-                AND m.cantidad_vencidos > 0
-            GROUP BY p.nombre_producto
-            ORDER BY total_vencidos DESC;
-        """
-        params = (fecha_inicio, fecha_fin)
-
-        try:
-            df_reporte = pd.read_sql_query(query, self.conn, params=params)
-            auditoria.registrar_auditoria(id_usuario[0], "GENERAR_REPORTE", "REPORTES", f"Usuario {id_usuario[1]} generó reporte de vencimientos desde {fecha_inicio} hasta {fecha_fin}")
-            return df_reporte
-        except Exception as e:
-            print(f"Error al generar reporte con pandas: {e}")
-            return pd.DataFrame() # devuelvo un dataframe vacio en caso de error
-
-
-
-    def reporte_evolucion_stock(self, tipo_periodo, fecha_fin, producto, id_usuario, auditoria):
-        if not self.cursor:
-            raise ConnectionError("La conexion no esta iniciada.")
-        
-        fecha_fin_obj = datetime.strptime(fecha_fin, '%Y-%m-%d')
-
-        match tipo_periodo:
-            case "1": 
-                dias_restar = 7 # semana
-            case "2": 
-                dias_restar = 30 # mes
-            case "3": 
-                dias_restar = 90 # trimestre
-            case "4": 
-                dias_restar = 365 # anio
-        
-        fecha_inicio_obj = fecha_fin_obj - timedelta(days=dias_restar)
-
-        fecha_inicio_sql = fecha_inicio_obj.strftime('%Y-%m-%d 00:00:00')
-        fecha_fin_sql = fecha_fin_obj.strftime('%Y-%m-%d 23:59:59')
-
-        query = """
-            SELECT
-                t.fecha_completa,
-                p.nombre_producto,
-                f.stock_final_del_dia
-            FROM fact_stock_diario f
-            JOIN dim_productos p ON f.id_producto = p.id_producto
-            JOIN dim_tiempo t ON f.id_fecha = t.id_fecha
-            WHERE
-                p.id_producto = ?
-                AND t.fecha_completa BETWEEN ? AND ?
-            ORDER BY
-                t.fecha_completa ASC;
-        """
-        params = (producto, fecha_inicio_sql, fecha_fin_sql)
-        try:
-            df_reporte = pd.read_sql_query(query, self.conn, params=params)
-            auditoria.registrar_auditoria(id_usuario[0], "GENERAR_REPORTE", "REPORTES", f"Usuario {id_usuario[1]} generó reporte de evolución de stock para el producto ID: {producto} desde {fecha_inicio_sql} hasta {fecha_fin_sql}")
-            return df_reporte
-        except Exception as e:
-            print(f"Error al generar reporte con pandas: {e}")
-            return pd.DataFrame()
-
-
-
     def generar_reporte(self, id_usuario, auditoria):
         auditoria.registrar_auditoria(id_usuario[0], "INGRESO","REPORTES",f"Usuario {id_usuario[1]} ingresó al módulo")
         print("Selecciones el tipo de reporte que desea:")
@@ -279,7 +202,4 @@ class Reporte:
                 df_reporte = self.reporte_egresos_producto(fecha_inicio_sql, fecha_fin_sql, producto, id_usuario, auditoria)
                 #periodo = input("En que tipo de periodo desea el reporte 1=anio, 2=trimestre, 3=mes, 4=semana, 5=dia")
                 self.graficar_reporte_egresos(df_reporte)
-            
-            
-            case "3":
-                df_reporte = self.reporte_evolucion_stock(periodo, fecha_fin, producto)
+
