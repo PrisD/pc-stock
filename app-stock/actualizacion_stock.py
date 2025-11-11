@@ -9,7 +9,7 @@ def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria):
     Esto se realiza en una única transacción.
     """
     if cantidad <= 0:
-        raise ValueError("La cantidad es positiva, pelotudo\n")
+        raise ValueError("La cantidad tiene que ser positiva, pelotudo")
 
     conn = sqlite3.connect(stockdb_path)
     cursor = conn.cursor()

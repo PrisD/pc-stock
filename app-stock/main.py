@@ -21,8 +21,8 @@ def mostrar_menu():
     print("3. Consultar Movimientos (Auditoría)")
     print("4. Consultar Alertas de Stock Bajo")
     print("5. Visualizar Reporte")
-    print("6. Cerrar Sesión")
-    print("8. Chequear vencimiento")
+    print("6. Chequear vencimiento")
+    print("7. Cerrar Sesión")
     print("Seleccione una opción: ", end="")
 
 
@@ -39,7 +39,7 @@ def main():
     auditoria = AuditoriaDB()
     login_manager = LoginManager()
     usuario_actual = None
-    programar_chequear_vencimiento(periodo=60)
+    programar_chequear_vencimiento()
 
     while True:
         if usuario_actual is None:
