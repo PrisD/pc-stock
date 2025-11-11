@@ -8,6 +8,9 @@ def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria):
     Crea una entrada en la tabla de movimientos y crea o modifica una entrada en la tabla de stock.
     Esto se realiza en una única transacción.
     """
+    if cantidad <= 0:
+        raise ValueError("La cantidad es positiva, pelotudo\n")
+
     conn = sqlite3.connect(stockdb_path)
     cursor = conn.cursor()
 
@@ -17,7 +20,7 @@ def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria):
         """, (id_lote, id_usuario[0], tipo, cantidad, fecha.strftime("%Y-%m-%d")))
 
     cursor.execute("""
-        SELECT id_producto
+        SELECT id_producto, estado, cantidad
         FROM lotes
         WHERE id_lote = ?
     """, (id_lote,))
@@ -35,22 +38,32 @@ def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria):
         INSERT OR IGNORE INTO stock (id_producto, cantidad)
         VALUES (?, 0)
     """, (id_producto,))
-    
-    
-    # ingreso
+
+    # Ingreso
     if tipo == 1:
         cursor.execute("""
             UPDATE stock
             SET cantidad = cantidad + ?
             WHERE id_producto = ?
         """, (cantidad, id_producto))
-    # egreso
+    # Egreso
     elif tipo == 0:
+        # Asegurarse de que haya suficiente stock del producto
         cursor.execute("""
-            UPDATE stock
-            SET cantidad = cantidad - ?
+            SELECT cantidad
+            FROM stock
             WHERE id_producto = ?
-        """, (cantidad, id_producto))
+        """, (id_producto,))
+        cantidad_stock = cursor.fetchone()[0]
+        if cantidad_stock >= cantidad:
+            cursor.execute("""
+                UPDATE stock
+                SET cantidad = cantidad - ?
+                WHERE id_producto = ?
+            """, (cantidad, id_producto))
+        else:
+            raise ValueError(
+                f"No hay stock suficiente del producto {id_producto}. Stock: {cantidad_stock}")
     else:
         conn.rollback()
         conn.close()
@@ -59,5 +72,6 @@ def actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria):
     conn.commit()
     conn.close()
     print(f"Movimiento registrado correctamente. Stock actualizado con exito.")
-    auditoria.registrar_auditoria(id_usuario[0], "REGISTRAR_MOVIMIENTO", "MOVIMIENTOS", f"Usuario {id_usuario[1]} registró un {'INGRESO' if tipo == 1 else 'EGRESO'} de {cantidad} unidades para el lote ID: {id_lote} del producto ID: {id_producto} en la fecha {fecha.strftime('%d/%m/%Y')}")
-    return 
+    auditoria.registrar_auditoria(id_usuario[0], "REGISTRAR_MOVIMIENTO", "MOVIMIENTOS",
+                                  f"Usuario {id_usuario[1]} registró un {'INGRESO' if tipo == 1 else 'EGRESO'} de {cantidad} unidades para el lote ID: {id_lote} del producto ID: {id_producto} en la fecha {fecha.strftime('%d/%m/%Y')}")
+    return

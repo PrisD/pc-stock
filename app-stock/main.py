@@ -94,16 +94,16 @@ def main():
                     input("\nPresione Enter para volver al menú...")
 
                 case "6":
+                    clear_screen()
+                    chequear_vencimiento()
+                    input("\nPresione Enter para volver al menú...")
+
+                case "7":
                     auditoria.registrar_auditoria(
                         usuario_actual[0], "LOGOUT", "MAIN", f"Usuario {usuario_actual[1]} cerró sesión")
                     usuario_actual = None
                     print("\nSesión cerrada.")
                     input("Presione Enter para continuar...")
-
-                case "8":
-                    clear_screen()
-                    chequear_vencimiento()
-                    input("\nPresione Enter para volver al menú...")
 
                 case _:
                     print("\nOpción no válida. Por favor, intente de nuevo.")
