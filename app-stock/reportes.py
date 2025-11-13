@@ -94,9 +94,9 @@ class Reporte:
 
             df_diario = df_reporte['cantidad_egresos'].resample('D').sum()
             df_semanal = df_reporte['cantidad_egresos'].resample('W').sum()
-            df_mensual = df_reporte['cantidad_egresos'].resample('M').sum()
-            df_trimestral = df_reporte['cantidad_egresos'].resample('Q').sum()
-            df_anual = df_reporte['cantidad_egresos'].resample('Y').sum()
+            df_mensual = df_reporte['cantidad_egresos'].resample('ME').sum()
+            df_trimestral = df_reporte['cantidad_egresos'].resample('QE').sum()
+            df_anual = df_reporte['cantidad_egresos'].resample('YE').sum()
             
             fig, axs = plt.subplots(3, 2, figsize=(18, 15)) 
             fig.suptitle(f'Dashboard de Egresos (Ventas) de: {nombre_producto}', fontsize=20)
@@ -169,20 +169,11 @@ class Reporte:
 
         match eleccion:
             case "1":
-                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ") # INGRESO DE LA FECHA DE INICIO
-                while not utils.validar_fecha_dw(fecha_inicio):
-                    print("Formato de fecha incorrecto. Reintentar")
-                    fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ")
-
-                fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ") # INGRESO DE LA FECHA DE FIN
-                while not utils.validar_fecha_dw(fecha_fin):
-                    print("Formato de fecha invalido. Reintentar")
-                    fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
-
-                if not utils.validar_rango_fechas_dw(fecha_inicio, fecha_fin): # CHEQUEO RANGO DE FECHAS VALIDO
-                    print("El rango de fechas es invalido. Recuerde que la fecha de inicio debe ser anterior o igual a la de fin.")
-                    return # detengo la generacio del reporte
-                
+                while True:
+                    fecha_inicio = utils.pedir_fecha(mensaje="Ingrese la fecha de inicio (dd/mm/aaaa): ", permitir_hoy=False, formato="%d/%m/%Y", permitir_futuras=True)
+                    fecha_fin = utils.pedir_fecha(mensaje="Ingrese la fecha de fin (dd/mm/aaaa): ", permitir_hoy=False, formato="%d/%m/%Y", permitir_futuras=True)
+                    if utils.validar_rango_fechas(fecha_inicio, fecha_fin):
+                        break   
 
                 producto = input("ingrese el producto: ") # INGRESO DEL ID DEL PRODUCTO
                 if not self.validar_producto_dw(producto):

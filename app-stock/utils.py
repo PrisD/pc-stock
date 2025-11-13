@@ -5,27 +5,16 @@ import sqlite3
 stockdb_path = os.path.join(os.path.dirname(__file__), "stock.db")
 
 
-def validar_fecha_dw(fecha):
-    """
-    Validar que el formato de fecha es yyyy-mm-dd
-    """
-    try:
-        datetime.strptime(fecha, '%Y-%m-%d')
-        return True
-    except ValueError:
-        return False
 
-
-def validar_rango_fechas_dw(fecha_inicio, fecha_fin):
+def validar_rango_fechas(fecha_inicio, fecha_fin):
     """
     Validar que fecha_inicio es menor que fecha_fin
     """
-    try:
-        dt_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
-        dt_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
-        return dt_inicio <= dt_fin
-    except ValueError:
+    if fecha_inicio > fecha_fin:
+        print("Error: la fecha de inicio no puede ser posterior a la fecha de fin.")
         return False
+    
+    return True
 
 
 def pedir_fecha(mensaje="Ingrese una fecha (dd/mm/aaaa): ", permitir_hoy=True, formato="%d/%m/%Y", permitir_futuras=False):
