@@ -170,8 +170,8 @@ class Reporte:
         match eleccion:
             case "1":
                 while True:
-                    fecha_inicio = utils.pedir_fecha(mensaje="Ingrese la fecha de inicio (dd/mm/aaaa): ", permitir_hoy=False, formato="%d/%m/%Y", permitir_futuras=True)
-                    fecha_fin = utils.pedir_fecha(mensaje="Ingrese la fecha de fin (dd/mm/aaaa): ", permitir_hoy=False, formato="%d/%m/%Y", permitir_futuras=True)
+                    fecha_inicio = utils.pedir_fecha(mensaje="Ingrese la fecha de inicio (dd/mm/aaaa): ", permitir_hoy=False, formato="%d/%m/%Y", permitir_futuras=False)
+                    fecha_fin = utils.pedir_fecha(mensaje="Ingrese la fecha de fin (dd/mm/aaaa): ", permitir_hoy=False, formato="%d/%m/%Y", permitir_futuras=False)
                     if utils.validar_rango_fechas(fecha_inicio, fecha_fin):
                         break   
 
