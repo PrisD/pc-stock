@@ -335,35 +335,40 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario, auditoria):
 # ---------------- MENU REGISTRO DE MOVIMIENTOS --------------------
 def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agregar id_usuario
     seguir = True
-    while seguir:
-        print("\n--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---")
-        print("1. Registrar Ingreso")
-        print("2. Registrar Egreso")
-        print("3. Crear Producto")
-        print("4. Listar Productos")
-        print("5. Listar Lotes")
-        print("6. Listar Movimientos")
-        print("7. Salir")
-        opcion = pedir("> ")
+    try:
+        while seguir:
+            print("\n--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---")
+            print("1. Registrar Ingreso")
+            print("2. Registrar Egreso")
+            print("3. Crear Producto")
+            print("4. Listar Productos")
+            print("5. Listar Lotes")
+            print("6. Listar Movimientos")
+            print("7. Salir")
+            opcion = pedir("> ")
 
-        if opcion == "1":
-            RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario, auditoria)
-        elif opcion == "2":
-            # falta agregar id_usuario
-            RegistrarMovimiento(conn, cursor, "EGRESO", id_usuario, auditoria)
-        elif opcion == "3":
-            CrearProducto(conn, cursor, id_usuario, auditoria)
-        elif opcion == "4":
-            ListarProductos(conn, cursor)
-        elif opcion == "5":
-            ListarLotes(conn, cursor)
-        elif opcion == "6":
-            ListarMovimientos(conn, cursor)
-        elif opcion == "7":
-            print("Saliendo...")
-            seguir = False
-        else:
-            print("Opción inválida.")
+            if opcion == "1":
+                RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario, auditoria)
+            elif opcion == "2":
+                # falta agregar id_usuario
+                RegistrarMovimiento(conn, cursor, "EGRESO", id_usuario, auditoria)
+            elif opcion == "3":
+                CrearProducto(conn, cursor, id_usuario, auditoria)
+            elif opcion == "4":
+                ListarProductos(conn, cursor)
+            elif opcion == "5":
+                ListarLotes(conn, cursor)
+            elif opcion == "6":
+                ListarMovimientos(conn, cursor)
+            elif opcion == "7":
+                print("Saliendo...")
+                seguir = False
+            else:
+                print("Opción inválida.")
+    
+    except SalidaAlMenu:
+        print("\nOperación cancelada. Volviendo al menú...\n")
+        return
 
 
 
