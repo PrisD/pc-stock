@@ -1,17 +1,25 @@
 from datetime import datetime
 from actualizacion_stock import actualizar_stock
 from crear_productos import CrearProducto, ListarProductos
-from crear_lotes import CrearLote, ListarLotes  
+from crear_lotes import CrearLote, ListarLotes, ListarLotesDeProducto  
 from utils import pedir_fecha
 import sqlite3
 
+class SalidaAlMenu(Exception):
+    pass
+
+def pedir(mensaje):
+    texto = input(mensaje).strip()
+    if texto.lower() == "salir":
+        raise SalidaAlMenu()
+    return texto
 
 # ---------------------------  CREAR MOVIMIENTOS------------------------------------
 
-def CrearMovimiento(conn, cursor, id_lote, id_usuario, tipo, cantidad, auditoria):
+def CrearMovimiento(conn, cursor, datos, auditoria):
     print("\n--- REGISTRAR MOVIMIENTO ---")
 
-    # 1) Obtener fecha actual directamente
+    # Obtener fecha del movimiento
     fecha = pedir_fecha(
         mensaje="Ingrese fecha del movimiento (dd/mm/aaaa) o presione Enter para usar la fecha actual: ",
         permitir_hoy=True,
@@ -19,14 +27,18 @@ def CrearMovimiento(conn, cursor, id_lote, id_usuario, tipo, cantidad, auditoria
         permitir_futuras=False
     )
 
-    # 2) Guardar en la base de datos
+    # Agregar la fecha al paquete de datos
+    datos["fecha"] = fecha
+
+    # Llamar al módulo que sí inserta y hace commit
     try:
-        return actualizar_stock(id_lote, id_usuario, tipo, cantidad, fecha, auditoria)
+        return actualizar_stock(conn, cursor, datos, auditoria)
 
     except Exception as e:
         print(f"Error al registrar el movimiento: {e}")
         conn.rollback()
         return None
+
 
 # ---------------- LISTAR MOVIMIENTOS ---------------
 
@@ -64,129 +76,152 @@ def ListarMovimientos(conn, cursor):
 
 # ---------------------------REGISTRAR MOVIMIENTOS------------------------------------
 def RegistrarMovimiento(conn, cursor, tipo, id_usuario, auditoria):
-    print(f"\n--- REGISTRAR {tipo} DE MERCANCÍA ---")
-
-    # ---------------- 1) Seleccionar producto ----------------
     try:
-        id_producto = int(input("Ingrese el ID del producto: "))
-    except ValueError:
-        # Hay que hacer un bucle para que no se cierre de una
-        print("Error: El ID del producto debe ser un número.\n")
-        return
+        print(f"\n--- REGISTRAR {tipo} DE MERCANCÍA ---")
 
-    # Verificar si el producto existe en la DB
-    cursor.execute(
-        "SELECT id_producto FROM productos WHERE id_producto = ?", (id_producto,))
-    producto = cursor.fetchone()
-
-    if producto is None:
-        if tipo == "INGRESO":
-            print("Producto no encontrado. ¿Desea crearlo ahora? (S/N)")
-            respuesta = input("> ").strip().upper()
-            if respuesta == "S":
-                id_producto = CrearProducto(conn, cursor, id_usuario, auditoria)
-                if id_producto is None:
-                    print("Error al crear producto. Operación cancelada.\n")
-                    return
-            else:
-                print("Operación cancelada.\n")
-                return
-        else:
-            print("Error: No se puede registrar egreso de un producto inexistente.\n")
+        # ---------------- 1) Seleccionar producto ----------------
+        try:
+            id_producto = int(pedir("Ingrese el ID del producto: "))
+        except ValueError:
+            # Hay que hacer un bucle para que no se cierre de una
+            print("Error: El ID del producto debe ser un número.\n")
             return
 
-    # ---------------- 2) Seleccionar lote ----------------
-    if tipo == "INGRESO":
-        codigo = input(
-            "Ingrese el ID del lote o presione ENTER para crear uno nuevo: ").strip()
+        # Verificar si el producto existe en la DB
+        cursor.execute(
+            "SELECT id_producto FROM productos WHERE id_producto = ?", (id_producto,))
+        producto = cursor.fetchone()
 
-        if codigo == "":  # Crear nuevo lote
-            id_lote = CrearLote(conn, cursor, id_producto, id_usuario, auditoria)
-            if id_lote is None:
-                print("Error al crear el lote. Operación cancelada.\n")
+        if producto is None:
+            if tipo == "INGRESO":
+                print("Producto no encontrado. ¿Desea crearlo ahora? (S/N)")
+                respuesta = pedir("> ").strip().upper()
+                if respuesta == "S":
+                    id_producto = CrearProducto(conn, cursor, id_usuario, auditoria)
+                    if id_producto is None:
+                        print("Error al crear producto. Operación cancelada.\n")
+                        return
+                else:
+                    print("Operación cancelada.\n")
+                    return
+            else:
+                print("Error: No se puede registrar egreso de un producto inexistente.\n")
                 return
 
-            # Obtener la cantidad inicial del lote recién creado
-            cursor.execute(
-                "SELECT cantidad FROM lotes WHERE id_lote = ?", (id_lote,))
-            cantidad = cursor.fetchone()[0]
+        # ---------------- 2) Seleccionar lote ----------------
+        
+        ListarLotesDeProducto(conn, cursor, id_producto)  # Mostrar los lotes del producto seleccionado
+        
+        lote_es_nuevo = False
+        datos_lote_nuevo = None
+        
+        if tipo == "INGRESO":
+            codigo = pedir(
+                "Ingrese el ID del lote o presione ENTER para crear uno nuevo: ").strip()
 
-        else:
+            if codigo == "":  # Crear nuevo lote
+                datos_lote_nuevo = CrearLote(conn, cursor, id_producto, id_usuario, auditoria)
+                lote_es_nuevo = True
+
+                cantidad = datos_lote_nuevo["cantidad"]
+                id_lote = None  #se asignará al insertar en la DB
+            
+            else: # Usar lote existente
+                try:
+                    id_lote = int(codigo)
+                except ValueError:
+                    print("Error: El ID del lote debe ser un número.\n")
+                    return
+
+                # Verificar si el lote existe
+                cursor.execute(
+                    "SELECT cantidad FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
+                lote = cursor.fetchone()
+                if lote is None:
+                    print("El lote no existe.\n")
+                    return
+
+                try:
+                    cantidad = int(pedir("Cantidad a ingresar: "))
+                except ValueError:
+                    print("Error: la cantidad debe ser un número.\n")
+                    return
+                
+        
+        
+        
+        else:  # EGRESO
             try:
-                id_lote = int(codigo)
+                id_lote = int(pedir("Ingrese el ID del lote: "))
             except ValueError:
                 print("Error: El ID del lote debe ser un número.\n")
                 return
 
-            # Verificar si el lote existe
+            # Obtener stock actual del lote
             cursor.execute(
-                "SELECT cantidad FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
+                "SELECT cantidad, estado FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
             lote = cursor.fetchone()
-            if lote is not None:
-                try:
-                    cantidad_ingreso = int(
-                        input("Ingrese la cantidad a ingresar al lote (unidades): "))
-                except ValueError:
-                    print("Error: La cantidad debe ser un número entero.\n")
-                    return
-
-                # Actualizar stock del lote
-                nueva_cantidad = lote[0] + cantidad_ingreso
-                cursor.execute(
-                    "UPDATE lotes SET cantidad = ? WHERE id_lote = ?", (nueva_cantidad, id_lote))
-                conn.commit()
-                auditoria.registrar_auditoria(id_usuario[0], "INGRESO_LOTE_EXISTENTE", "LOTES", f"Usuario {id_usuario[1]} ingresó {cantidad_ingreso} unidades al lote ID: {id_lote} del producto ID: {id_producto}")
-                cantidad = cantidad_ingreso
-                print("Stock del lote existente actualizado.\n")
-            else:
-                print("Error: El lote no existe. Operación cancelada.\n")
+            
+            if lote is None:
+                print("Error: El lote no existe. No se puede registrar el egreso.\n")
                 return
 
-    else:  # EGRESO
-        try:
-            id_lote = int(input("Ingrese el ID del lote: "))
-        except ValueError:
-            print("Error: El ID del lote debe ser un número.\n")
-            return
+            stock_actual, estado_lote = lote
+            
+            if estado_lote == "vencido":
+                print("No se pueden hacer egresos de lotes vencidos.\n")
+                return
+            
+            try:
+                cantidad = int(pedir("Cantidad a retirar: "))
+            except ValueError:
+                print("Error: la cantidad debe ser un número entero.\n")
+                return
 
-        # Obtener stock actual del lote
-        cursor.execute(
-            "SELECT cantidad, estado FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
-        lote = cursor.fetchone()
-        if lote is None:
-            print("Error: El lote no existe. No se puede registrar el egreso.\n")
-            return
+            if cantidad > stock_actual:
+                print(f"Stock insuficiente (hay {stock_actual}).\n")
+                return
+            
 
-        try:
-            cantidad = int(
-                input("Ingrese la cantidad a retirar del lote (unidades): "))
-        except ValueError:
-            print("Error: La cantidad debe ser un número entero.\n")
-            return
+        # ---------------- 3) Confirmación ----------------
+        print("\n--- CONFIRMAR MOVIMIENTO ---")
+        print(f"Producto ID: {id_producto}")
+        print(f"Tipo: {tipo}")
+        if lote_es_nuevo:
+            print(f"Lote nuevo (sin ID aún)")
+        else:
+            print(f"Lote ID: {id_lote}")
+        print(f"Cantidad: {cantidad}")
 
-        if cantidad > lote[0]:
-            print(f"Error: Stock insuficiente. Disponible: {lote[0]}\n")
+        confirm = pedir("ENTER para confirmar, otra cosa para cancelar: ").strip()
+        if confirm != "":
+            print("Movimiento cancelado.\n")
             return
         
-        if lote[1] == "vencido":
-            print(f"Error: no se pueden hacer egresos de lotes vencidos\n")
-            return
+        
+            # ---------------- Crear movimiento ----------------
+        datos = {
+            "tipo": tipo,
+            "id_producto": id_producto,
+            "lote_es_nuevo": lote_es_nuevo,
+            "id_lote": id_lote,
+            "datos_lote_nuevo": datos_lote_nuevo,
+            "cantidad": cantidad,
+            "id_usuario": id_usuario,
+        }
 
-        # Actualizar stock del lote
-        nueva_cantidad = lote[0] - cantidad
-        cursor.execute(
-            "UPDATE lotes SET cantidad = ? WHERE id_lote = ?", (nueva_cantidad, id_lote))
-        conn.commit()
-        auditoria.registrar_auditoria(id_usuario[0], "EGRESO_LOTE", "LOTES", f"Usuario {id_usuario[1]} retiró {cantidad} unidades del lote ID: {id_lote} del producto ID: {id_producto}")
-        print("Stock del lote actualizado.\n")
-
-    # ---------------- 3) Registrar movimiento ----------------
-    CrearMovimiento(conn, cursor, id_lote, id_usuario,
-                    1 if tipo.upper() == "INGRESO" else 0, cantidad, auditoria)
+        
+        CrearMovimiento(conn, cursor, datos, auditoria)
 
 
+
+    except SalidaAlMenu:
+        print("\nOperación cancelada. Volviendo al menú...\n")
+        return
+
+
+# ---------------- MENU REGISTRO DE MOVIMIENTOS --------------------
 def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agregar id_usuario
-    auditoria.registrar_auditoria(id_usuario[0], "INGRESO","MOVIMIENTOS",f"Usuario {id_usuario[1]} ingresó al módulo")
     seguir = True
     while seguir:
         print("\n--- MENU DE REGISTRO DE ENTRADAS Y SALIDAS ---")
@@ -197,7 +232,7 @@ def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agrega
         print("5. Listar Lotes")
         print("6. Listar Movimientos")
         print("7. Salir")
-        opcion = input("> ")
+        opcion = pedir("> ")
 
         if opcion == "1":
             RegistrarMovimiento(conn, cursor, "INGRESO", id_usuario, auditoria)
@@ -219,7 +254,6 @@ def menuRegistrarMovimiento(conn, cursor, id_usuario, auditoria): # falta agrega
             print("Opción inválida.")
 
 
-# -------------------- EJECUCIÓN PRINCIPAL --------------------
+
 
 #QUE SE PUEDAN INGRESAR LOTES VENCIDOS
-#QUE APAREZCAN ARRIBA LOS ULTIMOS LOTES, LOS ULTIMOS MOVIMIENTOS, LOS ULTIMOS PRODUCTOS CREADOS

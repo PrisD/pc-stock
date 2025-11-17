@@ -4,65 +4,60 @@ import sqlite3
 
 
 def CrearLote(conn, cursor, id_producto, usuario, auditoria):
-    print("\n--- CREAR LOTE ---")
+    print("\n--- CREAR LOTE (SIN GUARDAR AÚN) ---")
 
-    # ---------------- INGRESAR Y VALIDAR FECHAS ----------------
+    # ---------------- INGRESAR Y VALIDAR FECHA DE INGRESO ----------------
     fecha_ingreso = pedir_fecha(
-        mensaje="Fecha de ingreso (dd/mm/aaaa) o presione Enter para usar la fecha actual: ",
+        mensaje="Fecha de ingreso (dd/mm/aaaa) o Enter para hoy: ",
         permitir_hoy=True,
         formato="%d/%m/%Y",
         permitir_futuras=False
     )
 
+    # ---------------- INGRESAR Y VALIDAR FECHA DE VENCIMIENTO ----------------
     while True:
-        fecha_vencimiento = pedir_fecha(
+        fecha_venc = pedir_fecha(
             mensaje="Fecha de vencimiento (dd/mm/aaaa): ",
             permitir_hoy=False,
             formato="%d/%m/%Y",
-            permitir_futuras=True  # El vencimiento sí puede ser futuro
+            permitir_futuras=True
         )
 
-        if fecha_vencimiento < fecha_ingreso:
-            print("Error: La fecha de vencimiento no puede ser anterior a la de ingreso.")
-        else:
-            break
+        if fecha_venc < fecha_ingreso:
+            print("Error: La fecha de vencimiento no puede ser anterior a la fecha de ingreso.\n")
+            continue
+
+        break
 
     # ---------------- VALIDAR CANTIDAD ----------------
     while True:
-        cantidad_texto = input("Cantidad inicial: ").strip()
+        txt = input("Cantidad inicial: ").strip()
 
-        if not cantidad_texto.isdigit():
-            print("Error: La cantidad debe ser un número entero.\n")
+        if not txt.isdigit():
+            print("Error: Debe ser un número entero.\n")
             continue
 
-        cantidad = int(cantidad_texto)
+        cantidad = int(txt)
 
         if cantidad <= 0:
-            print("Error: La cantidad debe ser mayor a 0.\n")
+            print("Error: Debe ser mayor a 0.\n")
             continue
 
-        break  # Cantidad válida
+        break
 
-    # ---------------- GUARDAR EN "BASE DE DATOS" ----------------
-    try:
-        cursor.execute("""
-            INSERT INTO lotes (id_producto, fecha_ingreso, cantidad, estado, fecha_vencimiento)
-            VALUES (?, DATE(?), ?, ?, DATE(?))
-        """, (id_producto, fecha_ingreso.strftime("%Y-%m-%d"), cantidad, "activo", fecha_vencimiento.strftime("%Y-%m-%d")))
-        conn.commit()
+    # ---------------- ARMAR OBJETO DE RETORNO ----------------
+    datos_lote = {
+        "id_producto": id_producto,
+        "fecha_ingreso": fecha_ingreso,
+        "fecha_venc": fecha_venc,
+        "cantidad": cantidad,
+        "estado": "activo",   # siempre nuevo lote = activo
+        "usuario": usuario
+    }
 
-        auditoria.registrar_auditoria(usuario[0], "CREAR_LOTE", "LOTES", f"Usuario {usuario[1]} creó el lote para el producto ID: {id_producto}, Cantidad: {cantidad}, Fecha Ingreso: {fecha_ingreso.strftime('%d/%m/%Y')}, Fecha Vencimiento: {fecha_vencimiento.strftime('%d/%m/%Y')}")
+    print("\nLote preparado correctamente (SE CREARÁ SOLO SI CONFIRMÁS EL MOVIMIENTO).\n")
 
-        id_lote = cursor.lastrowid
-        print(
-            f"\n Lote '{id_lote}' creado correctamente para el producto {id_producto}.\n")
-        return id_lote
-
-    except Exception as e:
-        print(f" Error al crear el lote: {e}\n")
-        conn.rollback()
-        auditoria.registrar_auditoria(usuario[0], "ERROR_CREAR_LOTE", "LOTES", f"Usuario {usuario[1]} intentó crear un lote para el producto ID: {id_producto}. Error: {e}")
-        return None
+    return datos_lote
 
     # ---------------- LISTAR LOTES----------------
 
@@ -109,3 +104,52 @@ def ListarLotes(conn, cursor):
 
     except Exception as e:
         print(f" Error al listar lotes: {e}\n")
+        
+        
+        
+def ListarLotesDeProducto(conn, cursor, id_producto):
+    print(f"\n--- LOTES DEL PRODUCTO {id_producto} ---")
+
+    try:
+        cursor.execute("""
+            SELECT id_lote, cantidad, fecha_ingreso, fecha_vencimiento, estado
+            FROM lotes
+            WHERE id_producto = ?
+            ORDER BY id_lote DESC
+        """, (id_producto,))
+        lotes = cursor.fetchall()
+
+        if not lotes:
+            print("No hay lotes cargados para este producto.\n")
+            return
+
+        # Encabezado
+        print(f"{'ID Lote':<10} {'Cantidad':<10} {'F. Ingreso':<15} {'F. Vencimiento':<17} {'Estado'}")
+        print("-" * 80)
+
+        for id_lote, cantidad, fecha_ing, fecha_vto, estado in lotes:
+
+            # --- Formateo de fechas ---
+            try:
+                fecha_ing_dt = datetime.fromisoformat(fecha_ing)
+                fecha_ing_str = fecha_ing_dt.strftime("%d/%m/%Y")
+            except Exception:
+                fecha_ing_str = fecha_ing
+
+            if fecha_vto:
+                try:
+                    fecha_vto_dt = datetime.fromisoformat(fecha_vto)
+                    fecha_vto_str = fecha_vto_dt.strftime("%d/%m/%Y")
+                except Exception:
+                    fecha_vto_str = fecha_vto
+            else:
+                fecha_vto_str = "-"
+
+            print(
+                f"{id_lote:<10} {cantidad:<10} {fecha_ing_str:<15} {fecha_vto_str:<17} {estado}"
+            )
+
+        print()
+
+    except Exception as e:
+        print(f"Error al listar los lotes del producto: {e}\n")
