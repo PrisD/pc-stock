@@ -7,26 +7,35 @@ def CrearLote(conn, cursor, id_producto, usuario, auditoria):
     print("\n--- CREAR LOTE (SIN GUARDAR AÚN) ---")
 
     # ---------------- INGRESAR Y VALIDAR FECHA DE INGRESO ----------------
-    fecha_ingreso = pedir_fecha(
+    fecha_input = pedir_fecha(
         mensaje="Fecha de ingreso (dd/mm/aaaa) o Enter para hoy: ",
         permitir_hoy=True,
         formato="%d/%m/%Y",
         permitir_futuras=False
     )
+    
+    if isinstance(fecha_input, str):
+        fecha_ingreso = datetime.strptime(fecha_input, "%d/%m/%Y")
+    else:
+        fecha_ingreso = fecha_input
 
     # ---------------- INGRESAR Y VALIDAR FECHA DE VENCIMIENTO ----------------
     while True:
-        fecha_venc = pedir_fecha(
+        fecha_input = pedir_fecha(
             mensaje="Fecha de vencimiento (dd/mm/aaaa): ",
             permitir_hoy=False,
             formato="%d/%m/%Y",
             permitir_futuras=True
         )
 
-        if fecha_venc < fecha_ingreso:
+        if fecha_input < fecha_ingreso:
             print("Error: La fecha de vencimiento no puede ser anterior a la fecha de ingreso.\n")
             continue
-
+        
+        if isinstance(fecha_input, str):
+            fecha_venc = datetime.strptime(fecha_input, "%d/%m/%Y")
+        else:
+            fecha_venc = fecha_input
         break
 
     # ---------------- VALIDAR CANTIDAD ----------------

@@ -19,9 +19,11 @@ def actualizar_stock(conn, cursor, datos, auditoria):
     id_lote = datos["id_lote"]
     cantidad = datos["cantidad"]
     id_usuario = datos["id_usuario"]
+    estado_lote = datos["estado_lote"]
     fecha = datos["fecha"]
     fecha_vencimiento = datos_lote_nuevo["fecha_venc"] if lote_es_nuevo else None
     fecha_ingreso= datos_lote_nuevo["fecha_ingreso"] if lote_es_nuevo else None
+
 
     if cantidad <= 0:
         raise ValueError("La cantidad debe ser positiva.")
@@ -36,10 +38,10 @@ def actualizar_stock(conn, cursor, datos, auditoria):
                 VALUES (?, ?, ?, ?, ?)
             """, (
                 id_producto,
-                datos_lote_nuevo["fecha_ingreso"],
+                datos_lote_nuevo["fecha_ingreso"].strftime("%Y-%m-%d"),
                 datos_lote_nuevo["cantidad"],
                 datos_lote_nuevo["estado"],
-                datos_lote_nuevo["fecha_venc"],
+                datos_lote_nuevo["fecha_venc"].strftime("%Y-%m-%d"),
             ))
 
             id_lote = cursor.lastrowid  # obtener ID real del lote recién creado
@@ -84,30 +86,32 @@ def actualizar_stock(conn, cursor, datos, auditoria):
         ))
 
         # ---------------------------------------------------------------------
-        # 4) ACTUALIZAR TABLAS
+        # 4) ACTUALIZAR STOCK
         # ---------------------------------------------------------------------
-        cursor.execute("""
-            INSERT OR IGNORE INTO stock (id_producto, cantidad)
-            VALUES (?, 0)
-        """, (id_producto,))
-
-        if tipo == "INGRESO":
+        
+        if lote_es_nuevo or estado_lote == "activo":  # solo actualizar stock si no esta vencido
             cursor.execute("""
-                UPDATE stock SET cantidad = cantidad + ?
-                WHERE id_producto = ?
-            """, (cantidad, id_producto))
+                INSERT OR IGNORE INTO stock (id_producto, cantidad)
+                VALUES (?, 0)
+            """, (id_producto,))
 
-        else:  # EGRESO
-            cursor.execute("SELECT cantidad FROM stock WHERE id_producto = ?", (id_producto,))
-            stock_prod = cursor.fetchone()[0]
+            if tipo == "INGRESO":
+                cursor.execute("""
+                    UPDATE stock SET cantidad = cantidad + ?
+                    WHERE id_producto = ?
+                """, (cantidad, id_producto))
 
-            if cantidad > stock_prod:
-                raise ValueError(f"No hay stock suficiente del producto (hay {stock_prod}).")
+            else:  # EGRESO
+                cursor.execute("SELECT cantidad FROM stock WHERE id_producto = ?", (id_producto,))
+                stock_prod = cursor.fetchone()[0]
 
-            cursor.execute("""
-                UPDATE stock SET cantidad = cantidad - ?
-                WHERE id_producto = ?
-            """, (cantidad, id_producto))
+                if cantidad > stock_prod:
+                    raise ValueError(f"No hay stock suficiente del producto (hay {stock_prod}).")
+
+                cursor.execute("""
+                    UPDATE stock SET cantidad = cantidad - ?
+                    WHERE id_producto = ?
+                """, (cantidad, id_producto))
 
         # ---------------------------------------------------------------------
         # 5) COMMIT FINAL

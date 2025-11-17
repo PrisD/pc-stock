@@ -64,6 +64,7 @@ def main():
                     clear_screen()
                     menuRegistrarMovimiento(
                         conn, cursor, usuario_actual, auditoria)
+                    chequear_vencimiento()
                     verificar_stock(conn, cursor, usuario_actual, auditoria)
                     input("\nPresione Enter para volver al menú...")
 

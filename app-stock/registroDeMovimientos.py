@@ -20,12 +20,17 @@ def CrearMovimiento(conn, cursor, datos, auditoria):
     print("\n--- REGISTRAR MOVIMIENTO ---")
 
     # Obtener fecha del movimiento
-    fecha = pedir_fecha(
+    fecha_input = pedir_fecha(
         mensaje="Ingrese fecha del movimiento (dd/mm/aaaa) o presione Enter para usar la fecha actual: ",
         permitir_hoy=True,
         formato="%d/%m/%Y",
         permitir_futuras=False
     )
+    
+    if isinstance(fecha_input, str):
+        fecha = datetime.strptime(fecha_input, "%d/%m/%Y")
+    else:
+        fecha = fecha_input
 
     # Agregar la fecha al paquete de datos
     datos["fecha"] = fecha
@@ -135,16 +140,31 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario, auditoria):
 
                 # Verificar si el lote existe
                 cursor.execute(
-                    "SELECT cantidad FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
+                    "SELECT cantidad, estado FROM lotes WHERE id_lote = ? AND id_producto = ?", (id_lote, id_producto))
                 lote = cursor.fetchone()
                 if lote is None:
                     print("El lote no existe.\n")
                     return
 
+                stock_actual, estado_lote = lote
+                
                 try:
-                    cantidad = int(pedir("Cantidad a ingresar: "))
-                except ValueError:
-                    print("Error: la cantidad debe ser un número.\n")
+                    texto = pedir("Cantidad a INGRESAR: ").strip()
+
+                    if not texto.isdigit():
+                        raise ValueError("Debe ser un número entero positivo.")
+
+                    cantidad = int(texto)
+
+                    if cantidad <= 0:
+                        raise ValueError("La cantidad debe ser mayor a 0.")
+
+                except ValueError as e:
+                    print(f"Error: {e}\n")
+                    return
+
+                except SalidaAlMenu:
+                    print("Operación cancelada.\n")
                     return
                 
         
@@ -169,13 +189,25 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario, auditoria):
             stock_actual, estado_lote = lote
             
             if estado_lote == "vencido":
-                print("No se pueden hacer egresos de lotes vencidos.\n")
-                return
+                print("Egreso de un lote vencido, no apto para la venta.\n")
             
             try:
-                cantidad = int(pedir("Cantidad a retirar: "))
-            except ValueError:
-                print("Error: la cantidad debe ser un número entero.\n")
+                texto = pedir("Cantidad a RETIRAR: ").strip()
+
+                if not texto.isdigit():
+                    raise ValueError("Debe ser un número entero positivo.")
+
+                cantidad = int(texto)
+
+                if cantidad <= 0:
+                    raise ValueError("La cantidad debe ser mayor a 0.")
+
+            except ValueError as e:
+                print(f"Error: {e}\n")
+                return
+
+            except SalidaAlMenu:
+                print("Operación cancelada.\n")
                 return
 
             if cantidad > stock_actual:
@@ -208,6 +240,7 @@ def RegistrarMovimiento(conn, cursor, tipo, id_usuario, auditoria):
             "datos_lote_nuevo": datos_lote_nuevo,
             "cantidad": cantidad,
             "id_usuario": id_usuario,
+            "estado_lote": estado_lote if not lote_es_nuevo else datos_lote_nuevo["estado"]
         }
 
         

@@ -2,89 +2,119 @@ from datetime import datetime
 from actualizacion_stock import actualizar_stock
 import sqlite3
 
+
+class SalidaAlMenu(Exception):
+    pass
+
+def pedir_input(mensaje):
+    texto = input(mensaje).strip()
+    if texto.lower() == "salir":
+        raise SalidaAlMenu()
+    return texto
+
+
 def CrearProducto(conn, cursor, usuario, auditoria):
     print("\n--- CREAR PRODUCTO ---")
 
-    # ---------------- VALIDAR NOMBRE ----------------
-    while True:
-        nombre = input("Nombre (máx 50 caracteres): ").strip()
-
-        if len(nombre) > 50:
-            print("Error: El nombre no debe exceder los 50 caracteres.\n")
-            continue
-        
-        if len(nombre) < 1:
-            print("Error: El nombre no puede ser nulo.\n")
-            continue
-        
-        break  # nombre válida
-
-    # ---------------- VALIDAR DESCRIPCIÓN ----------------
-    while True:
-        descripcion = input("Descripción (máx 100 caracteres): ").strip()
-
-        if len(descripcion) > 100:
-            print("Error: La descripción no debe exceder los 100 caracteres.\n")
-            continue
-
-        break  # Descripción válida
-
-    # ---------------- VALIDAR STOCK BAJO ----------------
-    while True:
-        stock_min_texto = input("Stock bajo: ").strip()
-
-        if not stock_min_texto.isdigit():
-            print("Error: El stock bajo debe ser un número entero.\n")
-            continue
-
-        stock_min = int(stock_min_texto)
-
-        if stock_min < 0:
-            print("Error: El stock bajo debe ser mayor o igual a 0.\n")
-            continue
-
-        break  # Stock bajo válido
-
-    # ---------------- VALIDAR STOCK CRITICO ----------------
-    while True:
-        stock_critico_texto = input("Stock critico: ").strip()
-
-        if not stock_critico_texto.isdigit():
-            print("Error: El stock critico debe ser un número entero.\n")
-            continue
-
-        stock_critico = int(stock_critico_texto)
-
-        if stock_critico < 0:
-            print("Error: El stock critico debe ser mayor o igual a 0.\n")
-            continue
-
-        if stock_critico > stock_min:
-            print("Error: El stock critico debe ser menor o igual al stock bajo.\n")
-            continue
-
-        break  # Stock critico válido
-
-    # ---------------- GUARDAR EN "BASE DE DATOS" ----------------
     try:
-        cursor.execute("""
-            INSERT INTO productos (nombre, descripcion, stock_bajo, stock_critico)
-            VALUES (?, ?, ?, ?)
-        """, (nombre, descripcion, stock_min, stock_critico))
-        conn.commit()
+        # ---------------- VALIDAR NOMBRE ----------------
+        while True:
+            nombre = pedir_input("Nombre (máx 50 caracteres): ").strip()
 
-        id_producto = cursor.lastrowid  # Recupera el ID asignado automáticamente
+            if len(nombre) > 50:
+                print("Error: El nombre no debe exceder los 50 caracteres.\n")
+                continue
+            
+            if len(nombre) < 1:
+                print("Error: El nombre no puede ser nulo.\n")
+                continue
+            
+            break  # nombre válida
 
-        print(
-            f"\n Producto '{nombre}' creado correctamente con ID {id_producto}.\n")
-        auditoria.registrar_auditoria(usuario[0], "CREAR_PRODUCTO", "PRODUCTOS", f"Usuario {usuario[1]} creó el producto ID: {id_producto}, Nombre: {nombre} , Descripción: {descripcion}, Stock Bajo: {stock_min}, Stock Crítico: {stock_critico}")
-        return id_producto
+        # ---------------- VALIDAR DESCRIPCIÓN ----------------
+        while True:
+            descripcion = pedir_input("Descripción (máx 100 caracteres): ").strip()
 
-    except sqlite3.Error as e:
-        print(f"\n Error al guardar el producto: {e}\n")
-        conn.rollback()
+            if len(descripcion) > 100:
+                print("Error: La descripción no debe exceder los 100 caracteres.\n")
+                continue
+
+            break  # Descripción válida
+
+        # ---------------- VALIDAR STOCK BAJO ----------------
+        while True:
+            stock_min_texto = pedir_input("Stock bajo: ").strip()
+
+            if not stock_min_texto.isdigit():
+                print("Error: El stock bajo debe ser un número entero.\n")
+                continue
+
+            stock_min = int(stock_min_texto)
+
+            if stock_min < 0:
+                print("Error: El stock bajo debe ser mayor o igual a 0.\n")
+                continue
+
+            break  # Stock bajo válido
+
+        # ---------------- VALIDAR STOCK CRITICO ----------------
+        while True:
+            stock_critico_texto = pedir_input("Stock critico: ").strip()
+
+            if not stock_critico_texto.isdigit():
+                print("Error: El stock critico debe ser un número entero.\n")
+                continue
+
+            stock_critico = int(stock_critico_texto)
+
+            if stock_critico < 0:
+                print("Error: El stock critico debe ser mayor o igual a 0.\n")
+                continue
+
+            if stock_critico > stock_min:
+                print("Error: El stock critico debe ser menor o igual al stock bajo.\n")
+                continue
+
+            break  # Stock critico válido
+
+        # ---------------- GUARDAR EN "BASE DE DATOS" ----------------
+        
+        
+        # ---------------- 3) Confirmación ----------------
+        print("\n--- CONFIRMAR PRODUCTO ---")
+        print(f"Nombre : {nombre}")
+        print(f"Descripción : {descripcion}")
+        print(f"Stock Bajo : {stock_min}")
+        print(f"Stock Crítico : {stock_critico}")
+        confirm = pedir_input("ENTER para confirmar, otra cosa para cancelar: ").strip()
+        if confirm != "":
+            print("NO se cargó el producto.\n")
+            return
+        
+        
+        try:
+            cursor.execute("""
+                INSERT INTO productos (nombre, descripcion, stock_bajo, stock_critico)
+                VALUES (?, ?, ?, ?)
+            """, (nombre, descripcion, stock_min, stock_critico))
+            conn.commit()
+
+            id_producto = cursor.lastrowid  # Recupera el ID asignado automáticamente
+
+            print(
+                f"\n Producto '{nombre}' creado correctamente con ID {id_producto}.\n")
+            auditoria.registrar_auditoria(usuario[0], "CREAR_PRODUCTO", "PRODUCTOS", f"Usuario {usuario[1]} creó el producto ID: {id_producto}, Nombre: {nombre} , Descripción: {descripcion}, Stock Bajo: {stock_min}, Stock Crítico: {stock_critico}")
+            return id_producto
+
+        except sqlite3.Error as e:
+            print(f"\n Error al guardar el producto: {e}\n")
+            conn.rollback()
+            return None
+
+
+    except SalidaAlMenu:
+        print("Operación cancelada. Volviendo al menú principal.\n")
         return None
-
     # ---------------- LISTAR PRODUCTOS----------------
 
 
