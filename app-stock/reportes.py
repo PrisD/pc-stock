@@ -94,9 +94,9 @@ class Reporte:
 
             df_diario = df_reporte['cantidad_egresos'].resample('D').sum()
             df_semanal = df_reporte['cantidad_egresos'].resample('W').sum()
-            df_mensual = df_reporte['cantidad_egresos'].resample('ME').sum()
-            df_trimestral = df_reporte['cantidad_egresos'].resample('QE').sum()
-            df_anual = df_reporte['cantidad_egresos'].resample('YE').sum()
+            df_mensual = df_reporte['cantidad_egresos'].resample('MS').sum()
+            df_trimestral = df_reporte['cantidad_egresos'].resample('QS').sum()
+            df_anual = df_reporte['cantidad_egresos'].resample('YS').sum()
             
             fig, axs = plt.subplots(3, 2, figsize=(18, 15)) 
             fig.suptitle(f'Dashboard de Egresos (Ventas) de: {nombre_producto}', fontsize=20)
