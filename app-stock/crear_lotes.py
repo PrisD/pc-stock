@@ -87,7 +87,7 @@ def ListarLotes(conn, cursor):
             return
 
         # Encabezado
-        print(f"{'ID Lote':<10} {'ID Prod':<10} {'Cantidad':<10} {'F. Ingreso':<15} {'F. Vencimiento':<17} {'Estado'}")
+        print(f"{'ID Prod':<10} {'ID Lote':<10} {'Cantidad':<10} {'F. Ingreso':<15} {'F. Vencimiento':<17} {'Estado'}")
         print("-" * 80)
 
         for id_lote, id_prod, cantidad, fecha_ing, fecha_vto, estado in lotes:
@@ -107,7 +107,7 @@ def ListarLotes(conn, cursor):
                 fecha_vto_str = "-"
 
             print(
-                f"{id_lote:<10} {id_prod:<10} {cantidad:<10} {fecha_ing_str:<15} {fecha_vto_str:<17} {estado}")
+                f"{id_prod:<10} {id_lote:<10} {cantidad:<10} {fecha_ing_str:<15} {fecha_vto_str:<17} {estado}")
 
         print()
 
