@@ -51,7 +51,7 @@ def listarStock(conn, cursor):
         SELECT s.id_producto, p.nombre, s.cantidad
         FROM stock s
         INNER JOIN productos p ON s.id_producto = p.id_producto
-        ORDER BY p.nombre DESC;
+        ORDER BY s.id_producto DESC;
     """)
 
     filas = cursor.fetchall()
